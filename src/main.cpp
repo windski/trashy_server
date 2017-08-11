@@ -1,14 +1,14 @@
-#include <iostream>
 #include "config.h"
-#include "creat_socket.h"
+#include "Server.h"
+
 
 int main(int argc, char *argv[])
 {
-    using net::Creat_socket;
+    using net::Server;
 
-    Creat_socket sockfd;
+    Server server;
 
-    std::cout << sockfd.get_addr_len() << std::endl;  // test it...
+    server.config();   // 可以钦定IP address 或者 port..
 
-    return 0;
+    return server.run();
 }

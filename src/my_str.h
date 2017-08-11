@@ -11,6 +11,7 @@ namespace rewrite_tool {
 
     class my_str : public std::string {
     public:
+        my_str(char *str);
         in_addr_t to_addr(net::IP_VERSION ipv) const;
     };
 

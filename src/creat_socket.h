@@ -10,9 +10,10 @@
 namespace net {
 
     class Creat_socket {
-    private:
+    protected:
         sock_t sock_in;
         int sockfd;
+    private:
         void init_(sa_family_t family = AF_INET, in_addr_t ip = INADDR_ANY, int opt = 0);
     public:
         Creat_socket();

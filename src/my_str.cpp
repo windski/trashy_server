@@ -19,3 +19,9 @@ in_addr_t rewrite_tool::my_str::to_addr(net::IP_VERSION ipv) const
         return data;
     }
 }
+
+rewrite_tool::my_str::my_str(char *str)
+{
+
+
+}
