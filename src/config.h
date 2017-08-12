@@ -10,8 +10,9 @@
 #endif
 
 #ifndef DEBUG_PORT
-#define DEBUG_PORT 2333
+#define DEBUG_PORT 23333
 #endif
+
 
 #include <sys/socket.h>
 #include <arpa/inet.h>
@@ -19,10 +20,16 @@
 #include <cstring>
 #include <cstdlib>
 #include <unistd.h>
+#include <cstdio>
+#include <iostream>
+#include <cerrno>
+#include <sys/epoll.h>
+#include <fcntl.h>
 
 namespace net {
     const size_t MAXLINE = 4096;
     const size_t MAXQUE = 1024;
+    const size_t MAX_EVENT = 50;
 
     enum IP_VERSION { IPV4, IPV6 };
 
