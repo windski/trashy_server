@@ -114,7 +114,7 @@ namespace net {
         char buff[MAXLINE];
         char head[] = "HTTP/1.1 200 OK\r\nContent-type: text/html\r\nServer: MyServer/2.3.3 (DebianOS)\r\n\r\n";
         char send[] = "<html><title>test</title><body><h1>This is a Demo Server!!</h1></body></html>";
-        int n;
+        ssize_t n;
         while((n = read(fileno, buff, MAXLINE)) < 0) {
             if(errno == EINTR) {
                 continue;
@@ -123,6 +123,7 @@ namespace net {
                 exit(EXIT_FAILURE);
             }
         }
+        buff[n + 1] = '\0';
         write(fileno, head, sizeof(head));
         write(fileno, send, sizeof(send));
         printf("%s", buff);
