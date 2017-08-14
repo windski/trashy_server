@@ -5,7 +5,7 @@
 #ifndef TRASHY_SERVER_CREAT_SOCKET_H
 #define TRASHY_SERVER_CREAT_SOCKET_H
 #include "config.h"
-#include "my_str.h"
+#include "tool_util.h"
 
 namespace net {
 

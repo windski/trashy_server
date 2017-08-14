@@ -27,7 +27,7 @@ namespace net {
     void Creat_socket::init_(sa_family_t family, in_addr_t ip, int opt)
     {
         memset(&sock_in.in_addr, 0, sizeof(sock_in.in_addr));
-        sock_in.in_addr.sin_port = DEBUG_PORT;
+        sock_in.in_addr.sin_port = htons(DEBUG_PORT);
 
         if(ip != INADDR_ANY) {
             sock_in.in_addr.sin_addr.s_addr = ip;
