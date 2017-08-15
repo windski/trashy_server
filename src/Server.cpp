@@ -3,6 +3,7 @@
 //
 
 #include "Server.h"
+#include "tool_util.h"
 
 namespace net {
 
@@ -111,6 +112,7 @@ namespace net {
 
     void Server::do_somthing(int fileno)
     {
+
         char buff[MAXLINE];
         char head[] = "HTTP/1.1 200 OK\r\nContent-type: text/html\r\nServer: MyServer/2.3.3 (DebianOS)\r\n\r\n";
         char send[] = "<html><title>test</title><body><h1>This is a Demo Server!!</h1></body></html>";
@@ -123,6 +125,7 @@ namespace net {
                 exit(EXIT_FAILURE);
             }
         }
+        rewrite_tool::http_parse parse(buff);
         buff[n + 1] = '\0';
         write(fileno, head, sizeof(head));
         write(fileno, send, sizeof(send));

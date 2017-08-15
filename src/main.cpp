@@ -1,7 +1,6 @@
 #include "config.h"
 #include "Server.h"
 
-
 int main(int argc, char *argv[])
 {
     using net::Server;

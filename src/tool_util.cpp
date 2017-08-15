@@ -3,7 +3,8 @@
 //
 
 #include "tool_util.h"
-#include <cstring>
+#include "status_code.h"
+#include <regex>
 
 in_addr_t rewrite_tool::my_str::to_addr(net::IP_VERSION ipv) const
 {
@@ -27,41 +28,65 @@ rewrite_tool::my_str::my_str(char *str)
 }
 
 
-rewrite_tool::http_parse::http_parse(char * http_str, ssize_t len)
+rewrite_tool::http_parse::http_parse(char * http_str)
 {
-    auto splited_str = split_(http_str, len, '\n');       // 将字符串
+    std::string tmp_str(http_str);
+    std::vector<std::string> splited_str;
+    split_(splited_str, tmp_str, "\r\n");       // 将字符串以\r\n分割
     // TODO 解析http 协议
+    std::vector<std::string> route_str;
+    split_(route_str, splited_str[0], " ");
+
+    route = std::make_shared<std::string>(route_str[1]);
+
+    for(auto i : splited_str) {
+        setting_attrib(i);
+    }
 }
 
-// TODO 改bug...
-std::vector<std::vector<char>> rewrite_tool::http_parse::split_(char *str, ssize_t len, const char s)
+rewrite_tool::http_parse::http_parse(std::string)
 {
-    std::vector<std::vector<char>> result;
-    int i, j;
-    for(i = 0; i < len; i = j) {
-        char tmp[30];
-        for(j = i; j < len; j++) {
-            if(str[j] == s) {
-                for (int o = i; o <= j; o++) {
-                    tmp[o] = str[o];
-                }
-                break;
-            }
-        }
-        strmem(result[i], tmp, (j - i));  // may be bug here..
-        j++;
-    }
 
-    return result;
 }
 
-
-int rewrite_tool::http_parse::strmem(std::vector<char> &str, const char *souce, size_t len)
+int rewrite_tool::http_parse::split_(std::vector<std::string>result, const std::string &source, const std::string s)
 {
-    int i;
-    for(i = 0; i < len; i++) {
-        str.push_back(souce[i]);
+    std::string::size_type rhs, lhs;
+    lhs = 0;
+    rhs = source.find(s);
+
+    while(std::string::npos != rhs) {
+        result.push_back(source.substr(lhs, (rhs - lhs)));
+
+        lhs = rhs + s.size();
+        rhs = source.find(s, lhs);
     }
+    if(lhs != source.length()) {
+        result.push_back(s.substr(lhs));
+    }
+
     return 0;
+}
+
+rewrite_tool::http_parse::~http_parse()
+{
+
+}
+
+void rewrite_tool::http_parse::setting_attrib(std::string &source)
+{
+    if(std::regex_search(source, std::regex("(GET)"))) {
+        request_method = GET;
+    } else if(std::regex_search(source, std::regex("(POST)"))) {
+        request_method = POST;
+    } else if(std::regex_search(source, std::regex("(PUT)"))) {
+        request_method = PUT;
+    } else if(std::regex_search(source, std::regex("(DELETE)"))) {
+        request_method = DELETE;
+    } else if(std::regex_search(source, std::regex("(HEAD)"))) {
+        request_method = HEAD;
+    } else if(std::regex_search(source, std::regex("(HTTP/1.1)"))) {
+        version = 1;
+    }
 }
 

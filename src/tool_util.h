@@ -8,7 +8,6 @@
 #include "config.h"
 #include <memory>
 #include <vector>
-#include <map>
 
 namespace rewrite_tool {
 
@@ -18,19 +17,21 @@ namespace rewrite_tool {
         in_addr_t to_addr(net::IP_VERSION ipv) const;
     };
 
+
     class http_parse
     {
     private:
         int version;
-        enum method { NONE, GET, PUT, DELETE, POST, HEAD };
+        enum method { GET, PUT, DELETE, POST, HEAD };
         method request_method;
-        std::shared_ptr<char> route;
+        std::shared_ptr<std::string> route;
 
     private:
-        std::vector<std::vector<char>>split_(char *, ssize_t, const char);
-        inline int strmem(std::vector<char> &, const char *, size_t);
+        int split_(std::vector<std::string>, const std::string &, const std::string);
+//        inline int split_(std::pair<std::string, std::string> &, const std::string &, const char);
+        void setting_attrib(std::string &source);
     public:
-        http_parse(char *, ssize_t);
+        http_parse(char *);
         http_parse(std::string);
 
         ~http_parse();
