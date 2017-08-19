@@ -27,6 +27,8 @@
 #include <fcntl.h>
 
 #include <dirent.h>
+#include <sys/select.h>
+
 
 namespace net {
     const size_t MAXLINE = 4096;

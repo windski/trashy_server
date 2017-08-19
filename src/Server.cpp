@@ -74,7 +74,7 @@ namespace net {
                         exit(EXIT_FAILURE);
                     }
 
-                    setnonblocking(connfd);
+                    rewrite_tool::setnonblocking(connfd);
 
                     ev.events = EPOLLIN | EPOLLET;
                     ev.data.fd = connfd;
@@ -94,21 +94,6 @@ namespace net {
         return 0;
     }
 
-    void Server::setnonblocking(int fileno) {
-        int flags;
-
-        if((flags = fcntl(fileno, F_GETFL)) < 0) {
-            perror("fcntl get error");
-            exit(EXIT_FAILURE);
-        }
-
-        flags |=  O_NONBLOCK;
-
-        if(fcntl(fileno, F_SETFL, flags) < 0) {
-            perror("fcntl set error");
-            exit(EXIT_FAILURE);
-        }
-    }
 
     void Server::do_somthing(int fileno)
     {
@@ -125,7 +110,7 @@ namespace net {
                 exit(EXIT_FAILURE);
             }
         }
-        rewrite_tool::http_parse parse(buff);
+//        rewrite_tool::http_parse parse(buff);
         buff[n + 1] = '\0';
         write(fileno, head, sizeof(head));
         write(fileno, send, sizeof(send));

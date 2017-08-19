@@ -13,7 +13,6 @@ namespace net {
     class Server : private Creat_socket {
     private:
         int connfd;
-        void setnonblocking(int );
         void do_somthing(int);
     public:
         Server();
