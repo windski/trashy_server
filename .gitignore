@@ -36,3 +36,7 @@
 *.iml
 cmake-build-debug/
 
+# web page
+*.html
+*.js
+*.css

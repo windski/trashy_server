@@ -26,9 +26,12 @@
 #include <sys/epoll.h>
 #include <fcntl.h>
 
+#include <cstdarg>
+
 #include <dirent.h>
 #include <sys/select.h>
 
+#include "log.h"
 
 namespace net {
     const size_t MAXLINE = 4096;
@@ -49,4 +52,14 @@ namespace net {
     typedef struct sock_s sock_t;
 
 } // end of net
+
+#ifndef SERVER_NAME
+#define SERVER_NAME "Server: My server/2.3.3 (Debain OS)"
+#endif
+
+#ifndef HTTP_VER_STR
+#define HTTP_VER_STR "HTTP/1.1"
+#endif
+
+
 #endif //TRASHY_SERVER_CONFIG_H

@@ -5,6 +5,7 @@
 #include "tool_util.h"
 #include "status_code.h"
 #include <regex>
+#include <netinet/in.h>
 
 in_addr_t rewrite_tool::my_str::to_addr(net::IP_VERSION ipv) const
 {
@@ -111,46 +112,46 @@ int rewrite_tool::http_parse::make_response(int fileno)
 
 void rewrite_tool::http_parse::get_method(int sockfd)
 {
-    int fileno;
-    (*route).insert(0, "./");    // 先用这种解决办法吧..233
-    // TODO write a script to storage path.
-    char buff[net::MAXLINE];
-    ssize_t n;
-    std::string tmp;
-    int status_code = 0;
-
-    if((fileno = open((*route).c_str(), O_RDONLY)) > 0) {
-        status_code = 200;
-        // 感觉还是需要一个字符串的拼接函数...
-        // 恩....懒...
-        tmp = std::string("HTTP/1.1 200 OK\r\n Connection: close\r\n Server:Demo Server/2.3.3(Debian OS)\r\n Content-Type: text/html\r\n\r\n");
-    } else {
-        switch(errno) {
-            case EACCES:
-                // 403 forbidden
-                break;
-            case ENXIO:
-                perror("O_NONBLOCK flag has been set");
-                status_code = 500;
-                close(sockfd);
-                break;
-            default:
-                status_code = 404;
-                tmp = std::string("HTTP/1.1 404 Not Found\r\n Connection: close\r\n Server:Demo Server/2.3.3(Debian OS)\r\n Content-Type: text/html\r\n\r\n");
-                break;
-        }
-    }
-
-    write(sockfd, tmp.c_str(), tmp.size());
-
-    if(status_code == 200) {
-        while ((n = read(fileno, buff, net::MAXLINE)) > 0)
-            if (write(sockfd, buff, n) != n) {
-                perror("write error");
-            }
-    }
-
-    close(fileno);
+    GET_Respose G_res((*route).insert(0, "."));
+    G_res.response(sockfd);
+//    (*route).insert(0, ".");    // 先用这种解决办法吧..233
+//    // TODO write a script to storage path.
+//    char buff[net::MAXLINE];
+//    ssize_t n;
+//    std::string tmp;
+//    int status_code = 0;
+//
+//    if((fileno = open((*route).c_str(), O_RDONLY)) > 0) {
+//        status_code = 200;
+//        // 感觉还是需要一个字符串的拼接函数...
+//        // 恩....懒...
+//        tmp = std::string("HTTP/1.1 200 OK\r\n Connection: close\r\n Server:Demo Server/2.3.3(Debian OS)\r\n Content-Type: text/html\r\n\r\n");
+//    } else {
+//        switch(errno) {
+//            case EACCES:
+//                // 403 forbidden
+//                break;
+//            case ENXIO:
+//                perror("O_NONBLOCK flag has been set");
+//                status_code = 500;
+//                close(sockfd);
+//                break;
+//            default:
+//                status_code = 404;
+//                tmp = std::string("HTTP/1.1 404 Not Found\r\n Connection: close\r\n Server:Demo Server/2.3.3(Debian OS)\r\n Content-Type: text/html\r\n\r\n");
+//                break;
+//        }
+//    }
+//
+//    write(sockfd, tmp.c_str(), tmp.size());
+//
+//    if(status_code == 200) {
+//        while ((n = read(fileno, buff, net::MAXLINE)) > 0)
+//            if (write(sockfd, buff, n) != n) {
+//                perror("write error");
+//            }
+//    }
+//
     close(sockfd);
 }
 
@@ -174,10 +175,11 @@ void rewrite_tool::setnonblocking(int fileno)
 
 
 rewrite_tool::base_Respose::base_Respose()
-: version("HTTP/1.1"),
-  server_name("Server: My server/2.3.3 (Debain OS)\r\n")
+: version(HTTP_VER_STR),
+  server_name(SERVER_NAME),
+  route("index.html")
 {
-
+    *buff = new char[100];
 }
 
 rewrite_tool::base_Respose::~base_Respose()
@@ -185,14 +187,52 @@ rewrite_tool::base_Respose::~base_Respose()
 
 }
 
-
-
-void rewrite_tool::GET_Respose::respose(int fileno)
+rewrite_tool::base_Respose::base_Respose(std::string &path)
+: version(HTTP_VER_STR),
+  server_name(SERVER_NAME),
+  route(path)
 {
+    *buff = new char[100];
+
+    if(path == "/" || path == "./") {
+        route = "index.html";
+    }
+}
+
+int rewrite_tool::base_Respose::try_open()
+{
+    if((fileno = open(route.c_str(), O_RDONLY)) > 0) {
+        status_http_code = 200;
+    } else {
+        local_errno = errno;
+        return -1;
+    }
+
+    return 0;
+}
+
+
+void rewrite_tool::GET_Respose::response(int sockfd)
+{
+    if(try_open() == 0) {
+        // 200 response
+        sprintf(*buff, "%s %s\r\n %s\r\n\r\n", version, net::status_code(status_http_code), server_name);  // 未完待续..!!!
+        logging(INFO, "200 Response");
+    } else {
+        // TODO other http status codes
+    }
+
+    write(sockfd, *buff, sizeof(buff));     // http response header
 
 }
 
 rewrite_tool::GET_Respose::~GET_Respose()
+{
+    close(fileno);
+}
+
+rewrite_tool::GET_Respose::GET_Respose(std::string &path)
+: base_Respose(path)
 {
 
 }

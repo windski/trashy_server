@@ -1,13 +1,22 @@
-#include "config.h"
-#include "Server.h"
+//#include "config.h"
+//#include "Server.h"
+//
+//int main(int argc, char *argv[])
+//{
+//    using net::Server;
+//
+//    Server server;
+//
+//    server.config();   // 可以钦定IP address 或者 port..
+//
+//    return server.run();
+//}
 
-int main(int argc, char *argv[])
+#include "log.h"
+
+int main()
 {
-    using net::Server;
+    logging(INFO, "test");
 
-    Server server;
-
-    server.config();   // 可以钦定IP address 或者 port..
-
-    return server.run();
+    return 0;
 }

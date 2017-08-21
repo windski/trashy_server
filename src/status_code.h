@@ -67,7 +67,7 @@ namespace net{
     };
 
 
-    const static std::vector<std::pair<STATUS_CODE, std::string>> &status_codes() noexcept
+    const static std::vector<std::pair<STATUS_CODE, std::string>> status_codes() noexcept
     {
         std::vector<std::pair<STATUS_CODE, std::string>> status_code {
                 {STATUS_CODE::unknown, ""},
@@ -138,6 +138,15 @@ namespace net{
                 return status_code.second;
         }
         return status_codes()[0].second;
+    }
+
+    inline const char *status_code(size_t code_num) noexcept
+    {
+        for(auto &status_code : status_codes()) {
+            if(status_code.first == code_num)
+                return status_code.second.c_str();
+        }
+        return status_codes()[0].second.c_str();
     }
 
 }   // end of namespace net
