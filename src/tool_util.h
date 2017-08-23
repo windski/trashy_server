@@ -46,11 +46,10 @@ namespace rewrite_tool {
     protected:
         std::string version;
         std::string server_name;
-        std::shared_ptr<char *> buff;
+        std::shared_ptr<char *> http_header_buff;
         std::string route;
-        size_t status_http_code;
-        int local_errno;
         int fileno;
+        size_t response_status;
     protected:
         int try_open();
     public:

@@ -114,44 +114,9 @@ void rewrite_tool::http_parse::get_method(int sockfd)
 {
     GET_Respose G_res((*route).insert(0, "."));
     G_res.response(sockfd);
-//    (*route).insert(0, ".");    // 先用这种解决办法吧..233
-//    // TODO write a script to storage path.
-//    char buff[net::MAXLINE];
-//    ssize_t n;
-//    std::string tmp;
-//    int status_code = 0;
-//
-//    if((fileno = open((*route).c_str(), O_RDONLY)) > 0) {
-//        status_code = 200;
-//        // 感觉还是需要一个字符串的拼接函数...
-//        // 恩....懒...
-//        tmp = std::string("HTTP/1.1 200 OK\r\n Connection: close\r\n Server:Demo Server/2.3.3(Debian OS)\r\n Content-Type: text/html\r\n\r\n");
-//    } else {
-//        switch(errno) {
-//            case EACCES:
-//                // 403 forbidden
-//                break;
-//            case ENXIO:
-//                perror("O_NONBLOCK flag has been set");
-//                status_code = 500;
-//                close(sockfd);
-//                break;
-//            default:
-//                status_code = 404;
-//                tmp = std::string("HTTP/1.1 404 Not Found\r\n Connection: close\r\n Server:Demo Server/2.3.3(Debian OS)\r\n Content-Type: text/html\r\n\r\n");
-//                break;
-//        }
-//    }
-//
-//    write(sockfd, tmp.c_str(), tmp.size());
-//
-//    if(status_code == 200) {
-//        while ((n = read(fileno, buff, net::MAXLINE)) > 0)
-//            if (write(sockfd, buff, n) != n) {
-//                perror("write error");
-//            }
-//    }
-//
+
+    // TODO write a script to storage path.
+
     close(sockfd);
 }
 
@@ -179,7 +144,7 @@ rewrite_tool::base_Respose::base_Respose()
   server_name(SERVER_NAME),
   route("index.html")
 {
-    *buff = new char[100];
+    *http_header_buff = new char[100];
 }
 
 rewrite_tool::base_Respose::~base_Respose()
@@ -192,7 +157,7 @@ rewrite_tool::base_Respose::base_Respose(std::string &path)
   server_name(SERVER_NAME),
   route(path)
 {
-    *buff = new char[100];
+    *http_header_buff = new char[100];
 
     if(path == "/" || path == "./") {
         route = "index.html";
@@ -202,9 +167,41 @@ rewrite_tool::base_Respose::base_Respose(std::string &path)
 int rewrite_tool::base_Respose::try_open()
 {
     if((fileno = open(route.c_str(), O_RDONLY)) > 0) {
-        status_http_code = 200;
+        response_status = 200;
     } else {
-        local_errno = errno;
+        switch(errno) {
+            case EACCES:
+                response_status = 403;
+                logging(INFO, "The requested access to the file is not allowed.");
+                break;
+            case ENXIO:
+                response_status = 500;
+                logging(ERROR, "The file may is a device file. Or O_NONBLOCK | O_WRONLY is set.");
+                break;
+            case EEXIST:
+                // 300 相关?? 不清楚
+                break;
+            case ELOOP:
+                response_status = 503;
+                logging(WARN, "Too Many symbolic links were encountered..");
+                break;
+            case EFAULT:
+                response_status = 500;
+                logging(WARN, "`pathname poins outside your accessible address space.`");
+                break;
+            case EINVAL:
+                response_status = 500;
+                logging(ERROR, "flags is NOT Suitable...");
+                break;
+            case EPERM:
+                response_status = 500;
+                logging(WARN, "The Operation was prevented by a file seal..");
+                break;
+            default:
+                response_status = 404;
+                break;
+                // TODO other http status codes
+        }
         return -1;
     }
 
@@ -212,23 +209,38 @@ int rewrite_tool::base_Respose::try_open()
 }
 
 
-void rewrite_tool::GET_Respose::response(int sockfd)
-{
-    if(try_open() == 0) {
-        // 200 response
-        sprintf(*buff, "%s %s\r\n %s\r\n\r\n", version, net::status_code(status_http_code), server_name);  // 未完待续..!!!
-        logging(INFO, "200 Response");
-    } else {
-        // TODO other http status codes
-    }
+void rewrite_tool::GET_Respose::response(int sockfd) {
+    try_open();    // get response status code
 
-    write(sockfd, *buff, sizeof(buff));     // http response header
+    sprintf(*http_header_buff, "%s %s\r\n %s\r\n\r\n", version, net::status_code(response_status), server_name);
+    // 未完待续..!!! 到时候把配置脚本模块写出来, 自动判断文本类型..
+    // 所以现在http header 少了content/type
+
+    write(sockfd, *http_header_buff, sizeof(http_header_buff));     // http response header
+
+    logging(INFO, "%s Response complete...", net::status_code(response_status));
+
+    ssize_t n = 0;
+    char buff_[net::MAXLINE];
+
+    switch (response_status)
+    {
+        case 200:
+            while((n = read(fileno, buff_, net::MAXLINE)) > 0) {
+                if(write(sockfd, buff_, n) != n) {
+                    logging(ERROR, "Bad write to socket that file descriptor.");
+                }
+            }
+            break;
+        default:           // The others http status codes
+            break;
+    }
 
 }
 
 rewrite_tool::GET_Respose::~GET_Respose()
 {
-    close(fileno);
+    close(fileno);            // 对已经调用 close 过的 file descriptor 再调用 close 会置errno 为 EBADF.
 }
 
 rewrite_tool::GET_Respose::GET_Respose(std::string &path)
