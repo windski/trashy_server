@@ -144,12 +144,13 @@ rewrite_tool::base_Respose::base_Respose()
   server_name(SERVER_NAME),
   route("index.html")
 {
-    *http_header_buff = new char[100];
+    http_header_buff = new char[1024];
+    logging(WARN, "config error..");
 }
 
 rewrite_tool::base_Respose::~base_Respose()
 {
-
+    delete[] http_header_buff;
 }
 
 rewrite_tool::base_Respose::base_Respose(std::string &path)
@@ -157,14 +158,14 @@ rewrite_tool::base_Respose::base_Respose(std::string &path)
   server_name(SERVER_NAME),
   route(path)
 {
-    *http_header_buff = new char[100];
+    http_header_buff = new char[1024];
 
     if(path == "/" || path == "./") {
-        route = "index.html";
+        route = path.insert(2, "index.html");
     }
 }
 
-int rewrite_tool::base_Respose::try_open()
+int rewrite_tool::GET_Respose::try_open()
 {
     if((fileno = open(route.c_str(), O_RDONLY)) > 0) {
         response_status = 200;
@@ -199,6 +200,9 @@ int rewrite_tool::base_Respose::try_open()
                 break;
             default:
                 response_status = 404;
+                if((fileno = open("./404.html", O_RDONLY)) < 0) {
+                    logging(WARN, "Can NOT find `404.html`, checkout the file.");
+                }
                 break;
                 // TODO other http status codes
         }
@@ -212,13 +216,18 @@ int rewrite_tool::base_Respose::try_open()
 void rewrite_tool::GET_Respose::response(int sockfd) {
     try_open();    // get response status code
 
-    sprintf(*http_header_buff, "%s %s\r\n %s\r\n\r\n", version, net::status_code(response_status), server_name);
+    const char *status_response_str = net::status_code(response_status);
+    sprintf(http_header_buff, "%s %s\r\n %s\r\n Content-Type: text/html\r\n", version.c_str(), status_response_str,\
+     server_name.c_str());
     // 未完待续..!!! 到时候把配置脚本模块写出来, 自动判断文本类型..
     // 所以现在http header 少了content/type
 
-    write(sockfd, *http_header_buff, sizeof(http_header_buff));     // http response header
+    write(sockfd, http_header_buff, sizeof(http_header_buff));     // http response header
 
-    logging(INFO, "%s Response complete...", net::status_code(response_status));
+    logging(INFO, "%s Response complete...", status_response_str);
+
+    // WTF
+    // 突然发现 在发送了http header 之后, 就算是404 还要发送404的页面!!!!
 
     ssize_t n = 0;
     char buff_[net::MAXLINE];
@@ -232,6 +241,12 @@ void rewrite_tool::GET_Respose::response(int sockfd) {
                 }
             }
             break;
+        case 404:
+            while((n = read(fileno, buff_, net::MAXLINE)) > 0) {
+                if(write(sockfd, buff_, n) != n) {
+                    logging(ERROR, "Bad write to socket that file descriptor.");
+                }
+            }
         default:           // The others http status codes
             break;
     }

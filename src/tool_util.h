@@ -46,15 +46,12 @@ namespace rewrite_tool {
     protected:
         std::string version;
         std::string server_name;
-        std::shared_ptr<char *> http_header_buff;
+        char * http_header_buff;
         std::string route;
-        int fileno;
         size_t response_status;
-    protected:
-        int try_open();
+
     public:
         base_Respose();
-        inline int get_file_handle(void) const { return fileno != 0 ? fileno : 0; }
         explicit base_Respose(std::string &);
         virtual ~base_Respose();
         virtual void response(int ) = 0;
@@ -64,8 +61,11 @@ namespace rewrite_tool {
     class GET_Respose : public base_Respose
     {
     private:
-
+        int fileno;
+    protected:
+        int try_open();
     public:
+        inline int get_file_handle(void) const { return fileno != 0 ? fileno : 0; }
         GET_Respose(std::string &);
         ~GET_Respose();
         void response(int );
