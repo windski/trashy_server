@@ -74,6 +74,8 @@ static void logging(LEVEL level, const char *fmt, ...)
 
         i++;
 
+        // 不要问这里为什么使用if-else 而不用switch
+        // 这里不知不觉的成为了魔幻代码, 不过跟屎一样倒是真的...
         if(fmt_str[i] == 's') {
             std::string str_l = fmt_str.substr(0, i - 1);
             std::string str_r = fmt_str.substr(i + 1, fmt_str.length());
@@ -81,9 +83,20 @@ static void logging(LEVEL level, const char *fmt, ...)
             str_l.insert(str_l.length(), p_str);
             str_l += str_r;
             fmt_str.clear();
-            fmt_str = str_l;
-        } else if(fmt_str[i] == '%')
+            fmt_str = std::move(str_l);
+        } else if(fmt_str[i] == '%') {
             continue;
+        } else if(fmt_str[i] == 'd') {
+            int num__ = va_arg(args, int);
+            char result_[7];
+            sprintf(result_, "%d", num__);
+            std::string str_l = fmt_str.substr(0, i - 1);
+            std::string std_r = fmt_str.substr(i + 1, fmt_str.length());
+            str_l.insert(str_l.length(), result_);
+            str_l += std_r;
+            fmt_str.clear();
+            fmt_str = std::move(str_l);
+        }
 
     }
 

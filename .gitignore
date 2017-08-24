@@ -40,3 +40,7 @@ cmake-build-debug/
 *.html
 *.js
 *.css
+
+# my defined files
+test_module
+
