@@ -145,6 +145,8 @@ rewrite_tool::base_Respose::base_Respose()
   route("index.html")
 {
     http_header_buff = new char[1024];
+	memset(http_header_buff, 0, sizeof(http_header_buff));
+
     logging(WARN, "config error..");
 }
 
@@ -159,6 +161,7 @@ rewrite_tool::base_Respose::base_Respose(std::string &path)
   route(path)
 {
     http_header_buff = new char[1024];
+	memset(http_header_buff, 0, sizeof(http_header_buff));
 
     if(path == "/" || path == "./") {
         route = path.insert(2, "index.html");
@@ -212,56 +215,67 @@ int rewrite_tool::GET_Respose::try_open()
 }
 
 
-void rewrite_tool::GET_Respose::response(int sockfd) {
-    try_open();    // get response status code
+void rewrite_tool::GET_Respose::response(int sockfd)
+{
+	ssize_t n = 0;
+	ssize_t sum_n = n;
+	char buff_[net::MAXLINE];
 
-    const char *status_response_str = net::status_code(response_status);
-    sprintf(http_header_buff, "%s %s\r\n %s\r\n Content-Type: text/html\r\n", version.c_str(), status_response_str,\
-     server_name.c_str());
+	try_open();    // get response status code
+
+
+    sprintf(http_header_buff, "%s %s\r\n%s\r\nContent-Type: text/html\r\n\r\n", version.c_str(), \
+    net::status_code(response_status), server_name.c_str());
+
     // 未完待续..!!! 到时候把配置脚本模块写出来, 自动判断文本类型..
     // 所以现在http header 少了content/type
 
-    write(sockfd, http_header_buff, sizeof(http_header_buff));     // http response header
-
-    logging(INFO, "%s Response complete...", status_response_str);
+	std::string tmp(http_header_buff);
+	memset(buff_, 0, sizeof(buff_));
 
     // WTF
     // 突然发现 在发送了http header 之后, 就算是404 还要发送404的页面!!!!
 
-    ssize_t n = 0;
-    char buff_[net::MAXLINE];
-
-	// TODO: fix the bug that Browser have no pages data form.
-
+	// 这里其实还有bug, 从文件中读取第二次时有可能覆盖第一次数据..., 不过由于我的测试文件比较小, 没有出现这种现象
     switch (response_status)
     {
         case 200:
-            while((n = read(fileno, buff_, net::MAXLINE)) > 0) {
-	            logging(DEBUG, "send to %d bytes data.", n);
-                if(write(sockfd, buff_, n) != n) {
-                    logging(ERROR, "Bad write to socket that file descriptor.");
-                }
-            }
-		    logging(INFO, "200 status send fin.");
+	        while((n = read(fileno, (buff_ + sum_n), net::MAXLINE)) > 0) {
+		        sum_n += n;
+		        if(sum_n > net::MAXLINE) {
+			        logging(WARN, "Buff too short OR file too big");
+			        break;
+		        }
+	        }
             break;
         case 404:
-            while((n = read(fileno, buff_, net::MAXLINE)) > 0) {
-	            logging(DEBUG, "send to %d bytes data.");
-                if(write(sockfd, buff_, n) != n) {
-                    logging(ERROR, "Bad write to socket that file descriptor.");
-                }
-            }
-		    logging(INFO, "404 pages send fin.");
+	        while((n = read(fileno, (buff_ + sum_n), net::MAXLINE)) > 0) {
+		        sum_n += n;
+		        if(sum_n > net::MAXLINE) {
+			        logging(WARN, "Buff too short OR file too big");
+			        break;
+		        }
+	        }
         default:           // The others http status codes
 	        logging(WARN, "Not send any pages.");
             break;
     }
+	// 在insert过程中改变了status_response_str 在内存中的内容, 目测是由于内存布局的原因. 导致被修改,
+	// c++ string 就是屌, 已经被cosnt 修饰了, 还能更改...
+	// ps. 估计还是对static func 内存布局不熟...
+	tmp.insert(tmp.length(), buff_, sum_n);
+	if(write(sockfd, tmp.c_str(), tmp.length()) != 0) {
+		logging(INFO, " From %s pages send fin.", route.c_str());
+	} else {
+		logging(ERROR, " From %s can NOT send any pages.", route.c_str());
+	}
+
 
 }
 
 rewrite_tool::GET_Respose::~GET_Respose()
 {
-    close(fileno);            // 对已经调用 close 过的 file descriptor 再调用 close 会置errno 为 EBADF.
+//    close(fileno);            // 对已经调用 close 过的 file descriptor 再调用 close 会置errno 为 EBADF.
 }
 
 rewrite_tool::GET_Respose::GET_Respose(std::string &path)
