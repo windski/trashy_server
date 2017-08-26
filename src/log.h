@@ -44,15 +44,15 @@ char *logging_tmp_str = ctime(&log_time);                                       
 format_time_str(logging_tmp_str);                                                                  \
 switch(level) {                                                                                    \
 case DEBUG:                                                                                        \
-    printf("[%s] %s , %s\n", "DEBUG", logging_tmp_str, (logging_str));break;                       \
+    printf("[ %s ] %s , %s\n", "DEBUG", logging_tmp_str, (logging_str));break;                     \
 case INFO:                                                                                         \
-    printf("[%s] %s , %s\n", "INFO", logging_tmp_str, (logging_str));break;                        \
+    printf("[ %s ]  %s , %s\n", "INFO", logging_tmp_str, (logging_str));break;                     \
 case WARN:                                                                                         \
-    printf("[%s] %s , %s\n", "WARN", logging_tmp_str, (logging_str));break;                        \
+    printf("[ %s ]  %s , %s\n", "WARN", logging_tmp_str, (logging_str));break;                     \
 case ERROR:                                                                                        \
     char logging_char_buff[DEFAULT_MAXLENGTH];                                                     \
     memset(logging_char_buff, 0, sizeof(logging_char_buff));                                       \
-    sprintf(logging_char_buff, "[%s] %s , %s\n", "ERROR", logging_tmp_str, (logging_str));         \
+    sprintf(logging_char_buff, "[ %s ] %s , %s\n", "ERROR", logging_tmp_str, (logging_str));       \
     fputs(logging_char_buff, stderr);break;                                                        \
 default:break;                                                                                     \
 }                                                                                                  \

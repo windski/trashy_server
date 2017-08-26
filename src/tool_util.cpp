@@ -204,7 +204,6 @@ int rewrite_tool::GET_Respose::try_open()
                     logging(WARN, "Can NOT find `404.html`, checkout the file.");
                 }
                 break;
-                // TODO other http status codes
         }
         return -1;
     }
@@ -232,22 +231,29 @@ void rewrite_tool::GET_Respose::response(int sockfd) {
     ssize_t n = 0;
     char buff_[net::MAXLINE];
 
+	// TODO: fix the bug that Browser have no pages data form.
+
     switch (response_status)
     {
         case 200:
             while((n = read(fileno, buff_, net::MAXLINE)) > 0) {
+	            logging(DEBUG, "send to %d bytes data.", n);
                 if(write(sockfd, buff_, n) != n) {
                     logging(ERROR, "Bad write to socket that file descriptor.");
                 }
             }
+		    logging(INFO, "200 status send fin.");
             break;
         case 404:
             while((n = read(fileno, buff_, net::MAXLINE)) > 0) {
+	            logging(DEBUG, "send to %d bytes data.");
                 if(write(sockfd, buff_, n) != n) {
                     logging(ERROR, "Bad write to socket that file descriptor.");
                 }
             }
+		    logging(INFO, "404 pages send fin.");
         default:           // The others http status codes
+	        logging(WARN, "Not send any pages.");
             break;
     }
 
