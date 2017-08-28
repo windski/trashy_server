@@ -36,11 +36,6 @@
 *.iml
 cmake-build-debug/
 
-# web page
-*.html
-*.js
-*.css
-
 # my defined files
 test_module
 tags

@@ -54,11 +54,15 @@ namespace net {
 } // end of net
 
 #ifndef SERVER_NAME
-#define SERVER_NAME "Server: My server/2.3.3 (Debain OS)"
+# define SERVER_NAME "Server: My server/2.3.3 (Debain OS)"
 #endif
 
 #ifndef HTTP_VER_STR
-#define HTTP_VER_STR "HTTP/1.1"
+# define HTTP_VER_STR "HTTP/1.1"
+#endif
+
+#ifndef DEFAULT_CONFIG_FILE_PATH
+# define DEFAULT_CONFIG_FILE_PATH "../site_enable/default.conf"
 #endif
 
 
