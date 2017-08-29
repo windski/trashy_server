@@ -41,6 +41,13 @@ namespace net {
         return (status == 0x00) ? 0 : status;
     }
 
+    void sig_int_Ctrl_c(int sig)
+    {
+        // TODO: release the memory that alloc
+        // 先胡乱处理一下.. 后面再说..(埋个坑)
+        return ;
+    }
+
     int Server::run()
     {
         struct epoll_event ev, events[MAX_EVENT];
@@ -56,7 +63,10 @@ namespace net {
         if(epoll_ctl(epollfd, EPOLL_CTL_ADD, sockfd, &ev) == -1) {
             perror("epoll_ctl error");
             exit(EXIT_FAILURE);
+        
         }
+
+        void sig_int_Ctrl_c(int);
 
         while(true) {
             if((nfds = epoll_wait(epollfd, events, MAX_EVENT, -1)) == -1) {
@@ -91,6 +101,7 @@ namespace net {
             }
 
         }
+        signal(SIGINT, sig_int_Ctrl_c);
         return 0;
     }
 

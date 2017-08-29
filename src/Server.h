@@ -55,6 +55,7 @@ namespace net {
 	};
 
 
+    extern void sig_int_Ctrl_c(int sig);
 
 
 }  // end of namespace net
