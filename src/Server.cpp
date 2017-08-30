@@ -44,7 +44,7 @@ namespace net {
     void sig_int_Ctrl_c(int sig)
     {
         // TODO: release the memory that alloc
-        // 先胡乱处理一下.. 后面再说..(埋个坑)
+        // 先直接返回.. 后面再说..(埋个坑)
         return ;
     }
 

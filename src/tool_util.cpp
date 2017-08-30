@@ -34,12 +34,12 @@ rewrite_tool::http_parse::http_parse(char * http_str)
     std::string tmp_str(http_str);
     std::vector<std::string> splited_str;
     split_(splited_str, tmp_str, "\r\n");       // 将字符串以\r\n分割
-    // TODO 解析http 协议
     std::vector<std::string> route_str;
     split_(route_str, splited_str[0], " ");
 
     route = std::make_shared<std::string>(route_str[1]);
 
+	// 突然..发现, 可以在分割http request 后将其分段标号, 这样就不用在setting_attrib中用丑陋的if-else 串了... ˋ▽ˊ
     for(auto i : splited_str) {
         setting_attrib(i);
     }
@@ -77,6 +77,7 @@ rewrite_tool::http_parse::~http_parse()
 
 void rewrite_tool::http_parse::setting_attrib(std::string &source)
 {
+	// TODO: 用switch, 看上面 `突然..` 注释 (´・ω・`)
     if(std::regex_search(source, std::regex("(GET)"))) {
         request_method = GET;
     } else if(std::regex_search(source, std::regex("(POST)"))) {
@@ -102,7 +103,7 @@ int rewrite_tool::http_parse::make_response(int fileno)
             get_method(fileno);
             break;
 
-            // TODO POST methods etc.
+            // TODO POST methods etc. =_=
 
         default:
             break;
