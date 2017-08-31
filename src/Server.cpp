@@ -259,7 +259,7 @@ namespace net {
 
 	GET_Respose::~GET_Respose()
 	{
-//    close(fileno);            // 对已经调用 close 过的 file descriptor 再调用 close 会置errno 为 EBADF.
+        close(fileno);            // 对已经调用 close 过的 file descriptor 再调用 close 会置errno 为 EBADF.
 	}
 
 	GET_Respose::GET_Respose(std::string &path)

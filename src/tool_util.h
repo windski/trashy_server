@@ -8,6 +8,59 @@
 #include "config.h"
 #include <memory>
 #include <vector>
+#include <fstream>
+
+
+// base of MD5 func.
+#define F(x, y, z) (((x) & (y)) | ((~(x)) & (z)))
+#define G(x, y, z) (((x) & (z)) | ((y) & (~(z))))
+#define H(x, y, z) ((x) ^ (y) ^ (z))
+#define I(x, y, z) ((y) ^ ((x) | (~(z))))
+
+// Constants for MD5Transform routine.
+#define S11 7
+#define S12 12
+#define S13 17
+#define S14 22
+#define S21 5
+#define S22 9
+#define S23 14
+#define S24 20
+#define S31 4
+#define S32 11
+#define S33 16
+#define S34 23
+#define S41 6
+#define S42 10
+#define S43 15
+#define S44 21
+
+#define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
+
+#define FF(a, b, c, d, x, s, av) {               \
+	(a) += F((b), (c), (d)) + (x) + (av);        \
+	(a) = ROTATE_LEFT((a), (s));                 \
+	(a) += (b);                                  \
+}
+
+#define GG(a, b, c, d, x, s, av) {               \
+	(a) += G((b), (c), (d)) + (x) + (av);        \
+	(a) = ROTATE_LEFT((a), (s));                 \
+	(a) += (b);                                  \
+}
+
+#define HH(a, b, c, d, x, s, av) {               \
+	(a) += H((b), (c), (d)) + (x) + (av);        \
+	(a) = ROTATE_LEFT((a), (s));                 \
+	(a) += (b);                                  \
+}
+
+#define II(a, b, c, d, x, s, av) {               \
+	(a) += I((b), (c), (d)) + (x) + (av);        \
+	(a) = ROTATE_LEFT((a), (s));                 \
+	(a) += (b);                                  \
+}
+
 
 namespace rewrite_tool {
 
@@ -40,6 +93,45 @@ namespace rewrite_tool {
         ~http_parse();
     };
 
+
+
+	class MD5 {
+	private:
+		const size_t BUFF_LEN = 1024;
+		typedef unsigned char byte_t;
+
+		static const byte_t padding[64];
+		static const char hex[16];
+
+		byte_t __buff[64];
+		byte_t _digest[16];
+		ulong _magic_num[4];
+		ulong _count[2];
+		bool _finish;
+
+	private:
+		void update(const byte_t *in, size_t len);
+		void transformers(const byte_t block[]);
+		void decode(const byte_t *in, ulong *out, size_t len);
+		void encode(const ulong *in, byte_t *out, size_t len);
+		void final();
+		std::string bytes_to_string(const byte_t *in, size_t len);
+		MD5(const MD5&);
+		MD5 &operator=(const MD5 &);
+
+	public:
+		explicit MD5();
+		explicit MD5(std::string &str);
+		~MD5();
+		void reset();
+		void update(std::fstream &in_file);
+		void update(const std::string &str);
+		void update(const void *in, size_t len);
+		const byte_t *digest();
+		std::string to_string();
+		bool operator==(MD5 &rhs);
+
+	};
 
 } // end of rewrite_tool
 #endif //TRASHY_SERVER_MY_STR_H

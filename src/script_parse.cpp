@@ -12,23 +12,25 @@ namespace config_parse {
 	config_file_parse::config_file_parse()
 	: static_path(new char[100]),
 	  pages_path(new char[100]),
-	  config_fileno(0),
 	  page_file_type(nullptr)
 	{
-		std::fstream file(DEFAULT_CONFIG_FILE_PATH, std::ios::in);
-		if(!file.is_open()) {
-			logging(WARN, "Can NOT OPEN configure file.. from %s", DEFAULT_CONFIG_FILE_PATH);
+		config_file_stream.open(DEFAULT_CONFIG_FILE_PATH, std::ios::in);
+		if(!config_file_stream.is_open()) {
+			logging(WARN, "Can NOT OPEN configure config_file_stream.. from %s", DEFAULT_CONFIG_FILE_PATH);
 		}
+		rewrite_tool::MD5 _md5;
+		_md5.update(config_file_stream);
+		check_sumV5 = std::move(_md5.to_string());
 
 //		std::shared_ptr<char> tmp_file_buff(new char[net::MAXLINE]);
-//		file.read(tmp_file_buff.get(), net::MAXLINE);
-//		if(file.is_open()) {
-//			logging(WARN, "configuration file is big...");
+//		config_file_stream.read(tmp_file_buff.get(), net::MAXLINE);
+//		if(config_file_stream.is_open()) {
+//			logging(WARN, "configuration config_file_stream is big...");
 //		}
 		std::string tmp_file_buff;
 
-		while(!file.is_open()) {
-			std::getline(file, tmp_file_buff);
+		while(!config_file_stream.is_open()) {
+			std::getline(config_file_stream, tmp_file_buff);
 			const char *comment_ch = nullptr;
 
 			if(((comment_ch = strchr(tmp_file_buff.c_str(), '#')) != NULL)) {
@@ -55,7 +57,7 @@ namespace config_parse {
 
 	config_file_parse::~config_file_parse()
 	{
-
+		config_file_stream.close();
 	}
 
 	std::string config_file_parse::get_static_path(void)
@@ -72,6 +74,7 @@ namespace config_parse {
 
 	void config_file_parse::parse_setting(void)
 	{
+		// 埋下伏笔!
 		for(auto index : path_KV_data) {
 			// 这玩意跟http header 那儿的解析一样都用了if-else串...应该影响不了性能吧...   ╮（﹀＿﹀）╭
 			// 是的, 丑的一匹...
@@ -79,7 +82,13 @@ namespace config_parse {
 				config_file_listen_port = atoi(index.second.c_str());
 
 			} else if(std::regex_search(index.first, std::regex("location"))) {
-				root_dir = std::move(index.second);
+				if(index.second.size() == 0) {
+					root_dir = std::string("./");
+				} else {
+					check_dir(index.second);
+					root_dir = std::move(index.second);
+				}
+
 
 			} else if(std::regex_search(index.first, std::regex("html_pages"))) {
 				std::string tmp(index.second);
@@ -118,5 +127,12 @@ namespace config_parse {
 		}
 
 	}
+
+	int config_file_parse::get_listen_port()
+	{
+		parse_setting();
+		return config_file_listen_port;
+	}
+
 
 }       // end of namespace rewrite_tools
