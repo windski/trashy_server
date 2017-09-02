@@ -138,6 +138,8 @@ void rewrite_tool::setnonblocking(int fileno)
     }
 }
 
+
+
 const rewrite_tool::MD5::byte_t rewrite_tool::MD5::padding[64] = { 0x80 };    // 一不留神, 这么长..  _(:з」∠)_
 const char rewrite_tool::MD5::hex[16] = {
 		'0', '1', '2', '3',
@@ -233,6 +235,7 @@ void rewrite_tool::MD5::update(const rewrite_tool::MD5::byte_t *in, size_t len)
 	}
 }
 
+// 相信自己一段时间后用脚趾头都能想出这是跟什么用的...
 void rewrite_tool::MD5::transformers(const rewrite_tool::MD5::byte_t *block)
 {
 	ulong a = _magic_num[0], b = _magic_num[1], c = _magic_num[2], d = _magic_num[3];

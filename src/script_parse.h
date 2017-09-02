@@ -23,14 +23,17 @@ namespace config_parse {
 		route_path_t static_path;
 		route_path_t pages_path;
 		int config_file_listen_port;
-		std::fstream config_file_stream;
 		std::string page_file_type;
 		std::vector<std::pair<std::string, std::string>> path_KV_data;           // paths and values' data.
 		std::string root_dir;
 		std::string check_sumV5;       // configuration file's MD5;
+
 	private:
 		inline void parse_setting(void);
 		void check_dir(std::string &str);
+		std::string calcul_file_md5();
+		std::vector<std::pair<std::string, std::string>> load_file_to();
+
 	public:
 		explicit config_file_parse();
 
