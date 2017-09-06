@@ -7,6 +7,7 @@
 
 #include "creat_socket.h"
 #include "config.h"
+#include "script_parse.h"
 
 namespace net {
 
@@ -45,8 +46,10 @@ namespace net {
 	{
 	private:
 		int fileno;
+		std::string file_type;
 	protected:
 		int try_open();
+		std::string get_text_file_T(std::string & str) const;
 	public:
 		inline int get_file_handle(void) const { return fileno != 0 ? fileno : 0; }
 		GET_Respose(std::string &);

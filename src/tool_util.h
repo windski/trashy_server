@@ -9,7 +9,7 @@
 #include <memory>
 #include <vector>
 #include <fstream>
-
+#include "script_parse.h"
 
 // base of MD5 func.
 #define F(x, y, z) (((x) & (y)) | ((~(x)) & (z)))

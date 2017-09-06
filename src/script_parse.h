@@ -10,18 +10,27 @@
 #include <vector>
 #include <memory>
 
-// TODO: configuration file parse
+// TODO: configuration file parse <- fix this bug..
 
-
-#define str_offset(lfhd, rihd) ((size_t)((rihd) - (lfhd)))
 
 namespace config_parse {
 
+	inline unsigned long str_offset_L(char *lfhd, const char *rihd)
+	{
+		unsigned long i = 0;
+		while(lfhd[i]) {
+			if(lfhd[i] != *rihd)
+				i++;
+			else
+				break;
+		}
+		return i;
+	}
+
 	class config_file_parse {
 	private:
-		typedef std::shared_ptr<char> route_path_t;
-		route_path_t static_path;
-		route_path_t pages_path;
+		std::string static_path;
+		std::string pages_path;
 		int config_file_listen_port;
 		std::string page_file_type;
 		std::vector<std::pair<std::string, std::string>> path_KV_data;           // paths and values' data.
@@ -33,6 +42,7 @@ namespace config_parse {
 		void check_dir(std::string &str);
 		std::string calcul_file_md5();
 		std::vector<std::pair<std::string, std::string>> load_file_to();
+		void remove_space(std::string &str) const noexcept;
 
 	public:
 		explicit config_file_parse();
@@ -45,6 +55,7 @@ namespace config_parse {
 
 		int get_listen_port(void);
 	};
+
 }
 
 #endif //TRASHY_SERVER_SCRIPT_PARSE_H

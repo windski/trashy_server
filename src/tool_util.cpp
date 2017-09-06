@@ -113,13 +113,28 @@ int rewrite_tool::http_parse::make_response(int fileno)
 
 void rewrite_tool::http_parse::get_method(int sockfd)
 {
-    net::GET_Respose G_res((*route).insert(0, "."));
+	config_parse::config_file_parse file_path;
+	std::string tmp_path = file_path.get_pages_path();
+
+	if(*tmp_path.rbegin() != '/')
+		tmp_path.insert(tmp_path.length(), "/");
+
+	if(*route == "/") {
+		route->clear();
+		(*route) = "index.html";
+	}
+
+	route->insert(0, tmp_path);
+
+    net::GET_Respose G_res(*route);
     G_res.response(sockfd);
 
     // TODO write a script to storage path.
 
     close(sockfd);
 }
+
+
 
 void rewrite_tool::setnonblocking(int fileno)
 {

@@ -7,13 +7,15 @@
 
 namespace net {
 
-    Server::Server(char *ip, int port) : connfd(0)
+    Server::Server(char *ip, int port)
+		    : connfd(0)
     {
         rewrite_tool::my_str str(ip);
         Creat_socket(AF_INET, str, 0);
     }
 
-    Server::Server(char *ip) : connfd(0)
+    Server::Server(char *ip)
+		    : connfd(0)
     {
         rewrite_tool::my_str str(ip);
         Creat_socket(AF_INET, str, 0);
@@ -148,9 +150,6 @@ namespace net {
 		http_header_buff = new char[1024];
 		memset(http_header_buff, 0, sizeof(http_header_buff));
 
-		if(path == "/" || path == "./") {
-			route = path.insert(2, "index.html");
-		}
 	}
 
 	int GET_Respose::try_open()
@@ -208,8 +207,12 @@ namespace net {
 
 		try_open();    // get response status code
 
+		std::string file_T__ = get_text_file_T(route);
 
-		sprintf(http_header_buff, "%s %s\r\n%s\r\nContent-Type: text/html\r\n\r\n", version.c_str(), status_code(response_status), server_name.c_str());
+		logging(DEBUG, "file type is %s", file_T__.c_str());
+
+		sprintf(http_header_buff, "%s %s\r\n%s\r\nContent-Type: text/html\r\n\r\n", \
+		version.c_str(), status_code(response_status), server_name.c_str());
 
 		// 未完待续..!!! 到时候把配置脚本模块写出来, 自动判断文本类型..
 		// 所以现在http header 少了content/type
@@ -249,9 +252,9 @@ namespace net {
 		// ps. 估计还是对static func 内存布局不熟...
 		tmp.insert(tmp.length(), buff_, sum_n);
 		if(write(sockfd, tmp.c_str(), tmp.length()) != 0) {
-			logging(INFO, " From %s pages send fin.", route.c_str());
+			logging(INFO, "From %s pages send fin.", route.c_str());
 		} else {
-			logging(ERROR, " From %s can NOT send any pages.", route.c_str());
+			logging(ERROR, "From %s can NOT send any pages.", route.c_str());
 		}
 
 
@@ -266,6 +269,20 @@ namespace net {
 			: base_Respose(path)
 	{
 
+	}
+
+	std::string net::GET_Respose::get_text_file_T(std::string &str) const
+	{
+		char parse_buff_[net::MAXLINE];
+		memset(parse_buff_, 0, sizeof(parse_buff_));
+
+		strcpy(parse_buff_, str.c_str());
+		const char *type_str = strrchr(parse_buff_, '.');
+
+		size_t tail_len = config_parse::str_offset_L(parse_buff_, type_str);
+		size_t  tmp_pos__ = str.length();
+
+		return str.substr(tail_len + 1, tmp_pos__);
 	}
 
 
