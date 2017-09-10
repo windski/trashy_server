@@ -122,6 +122,10 @@ void rewrite_tool::http_parse::get_method(int sockfd)
 	if(*route == "/") {
 		route->clear();
 		(*route) = "index.html";
+	} else {
+		std::string &&tmp_route = route->substr(1, route->length());
+		route->clear();
+		(*route) = tmp_route;
 	}
 
 	route->insert(0, tmp_path);
