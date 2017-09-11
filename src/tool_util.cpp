@@ -413,13 +413,3 @@ std::string rewrite_tool::MD5::to_string()
 	return bytes_to_string(digest(), 16);
 }
 
-bool rewrite_tool::MD5::operator==(MD5 & rhs)
-{
-	if(this == &rhs)
-		return true;
-	std::string tmp_l(this->to_string());
-	std::string tmp_r(rhs.to_string());
-	logging(DEBUG, "%s", tmp_l.c_str());
-	logging(DEBUG, "%s", tmp_r.c_str());
-	return tmp_l == tmp_r;
-}

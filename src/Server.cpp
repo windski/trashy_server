@@ -282,6 +282,10 @@ namespace net {
 		size_t tail_len = config_parse::str_offset_L(parse_buff_, type_str);
 		size_t  tmp_pos__ = str.length();
 
+		if(tmp_pos__ - tail_len > 7)
+			logging(WARN, "file's suffix may too long..");
+
+		// TODO: using multimap to storage what file's suffix..
 		return str.substr(tail_len + 1, tmp_pos__);
 	}
 

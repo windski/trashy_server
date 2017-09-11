@@ -10,8 +10,6 @@
 #include <vector>
 #include <memory>
 
-// TODO: configuration file parse <- fix this bug..
-
 
 namespace config_parse {
 

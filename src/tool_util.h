@@ -129,7 +129,6 @@ namespace rewrite_tool {
 		void update(const void *in, size_t len);
 		const byte_t *digest();
 		std::string to_string();
-		bool operator==(MD5 &rhs);
 
 	};
 
