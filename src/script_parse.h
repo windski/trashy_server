@@ -15,6 +15,8 @@ namespace config_parse {
 
 	inline unsigned long str_offset_L(char *lfhd, const char *rihd)
 	{
+		if(rihd == nullptr || lfhd == nullptr)
+			return 0;
 		unsigned long i = 0;
 		while(lfhd[i]) {
 			if(lfhd[i] != *rihd)
