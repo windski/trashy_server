@@ -27,6 +27,8 @@
 #include <iostream>
 #include <cerrno>
 #include <stdexcept>
+#include <cassert>
+
 
 #include <cstdarg>
 

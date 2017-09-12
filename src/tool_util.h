@@ -81,13 +81,15 @@ namespace rewrite_tool {
         std::shared_ptr<std::string> route;
         std::string host;
     private:
-        int split_(std::vector<std::string>&, const std::string &, const std::string);
+        int split_(std::vector<std::string>&, const std::string &, const std::string&& ) const;
 //        inline int split_(std::pair<std::string, std::string> &, const std::string &, const char);
         void setting_attrib(std::string &source);
         void get_method(int);
+	    inline bool __find_str_s(std::string&, const char ) const;
+	    inline bool check_post_use_get() const;
     public:
         explicit http_parse(char *);
-        explicit http_parse(std::string);
+        explicit http_parse(std::string &);
         int make_response(int fileno);
 
         ~http_parse();

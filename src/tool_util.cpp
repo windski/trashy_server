@@ -31,6 +31,7 @@ rewrite_tool::my_str::my_str(char *str)
 
 rewrite_tool::http_parse::http_parse(char * http_str)
 {
+	assert(http_str != nullptr);
     std::string tmp_str(http_str);
     std::vector<std::string> splited_str;
     split_(splited_str, tmp_str, "\r\n");       // 将字符串以\r\n分割
@@ -39,6 +40,10 @@ rewrite_tool::http_parse::http_parse(char * http_str)
 
     route = std::make_shared<std::string>(route_str[1]);
 
+	if(check_post_use_get()) {
+		logging(WARN, "Could NOT able to handle get-post method..");
+	}
+
 	// 突然..发现, 可以在分割http request 后将其分段标号, 这样就不用在setting_attrib中用丑陋的if-else 串了... ˋ▽ˊ
     for(auto i : splited_str) {
         setting_attrib(i);
@@ -46,12 +51,17 @@ rewrite_tool::http_parse::http_parse(char * http_str)
 
 }
 
-rewrite_tool::http_parse::http_parse(std::string)
+rewrite_tool::http_parse::http_parse(std::string & str)
 {
-
+	// Thinking by my toe, may has a bug here..
+	size_t str_len = str.length();
+	std::shared_ptr<char> tmp_str_(new char[str_len]);
+	memcpy(tmp_str_.get(), str.c_str(), sizeof(str.c_str()));
+	http_parse(tmp_str_.get());
 }
 
-int rewrite_tool::http_parse::split_(std::vector<std::string>&result, const std::string &source, const std::string s)
+int rewrite_tool::http_parse::split_(std::vector<std::string>&result, const std::string &source,
+                                     const std::string&& s) const
 {
     std::string::size_type rhs, lhs;
     lhs = 0;
@@ -77,23 +87,69 @@ rewrite_tool::http_parse::~http_parse()
 
 void rewrite_tool::http_parse::setting_attrib(std::string &source)
 {
-	// TODO: 用switch, 看上面 `突然..` 注释 (´・ω・`)
+	// TODO: 用switch 有bug
     if(std::regex_search(source, std::regex("(GET)"))) {
         request_method = GET;
+	    return ;
     } else if(std::regex_search(source, std::regex("(POST)"))) {
         request_method = POST;
+	    return ;
     } else if(std::regex_search(source, std::regex("(PUT)"))) {
         request_method = PUT;
+	    return ;
     } else if(std::regex_search(source, std::regex("(DELETE)"))) {
         request_method = DELETE;
+	    return ;
     } else if(std::regex_search(source, std::regex("(HEAD)"))) {
         request_method = HEAD;
+	    return ;
     } else if(std::regex_search(source, std::regex("(HTTP/1.1)"))) {
         version = 1;
+	    return ;
     } else if(std::regex_search(source, std::regex("(Host:)"))) {
         std::string::size_type index = source.find("Host");
         host = source.substr(index + 5);
     }
+
+
+//
+//	std::string::size_type index;
+//
+//	char line_1st = source[0];
+//	char line_2nd = source[1];
+//
+//	switch(line_1st) {
+//		case 'G':
+//			// GET
+//			request_method = GET;
+//			break;
+//		case 'P':
+//			// POST
+//			request_method = POST;
+//			break;
+//		case 'D':
+//			// DELETE
+//			request_method = DELETE;
+//			break;
+//		case 'H':
+//			switch(line_2nd) {
+//				case 'E':
+//					// HEAD
+//					request_method = HEAD;
+//					break;
+//				case 'o':
+//					// Host
+//					index = source.find("HOST");
+//					host = source.substr(index + 6);
+//					break;
+//				default:
+//					break;
+//			}
+//			break;
+//		default:
+//			break;
+//	}
+
 }
 
 int rewrite_tool::http_parse::make_response(int fileno)
@@ -103,7 +159,10 @@ int rewrite_tool::http_parse::make_response(int fileno)
             get_method(fileno);
             break;
 
-            // TODO POST methods etc. =_=
+	    case POST:
+		    // TODO POST methods etc. =_=
+		    break;
+
 
         default:
             break;
@@ -133,9 +192,37 @@ void rewrite_tool::http_parse::get_method(int sockfd)
     net::GET_Respose G_res(*route);
     G_res.response(sockfd);
 
-    // TODO write a script to storage path.
 
     close(sockfd);
+}
+
+bool rewrite_tool::http_parse::check_post_use_get() const
+{
+	// if use GET method to update the file that on the server...
+	// may have some `&` or `?`
+	std::vector<std::string> tmp_r;
+	std::string tmp_route = *route;
+
+	if(__find_str_s(*route, '?')) {
+		split_(tmp_r, tmp_route, "?");
+	} else {
+		return false;
+	}
+
+	logging(WARN, "Route (URI) has too many `?`");
+	for(auto i : tmp_r[1]) {
+		if(i == '&')
+			return true;
+	}
+}
+
+bool rewrite_tool::http_parse::__find_str_s(std::string & str, const char o) const
+{
+	for(auto i : str) {
+		if(i == o)
+			return true;
+	}
+	return false;
 }
 
 

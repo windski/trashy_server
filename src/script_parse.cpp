@@ -59,6 +59,9 @@ namespace config_parse {
 					root_dir = std::string("./");
 				} else {
 					check_dir(index.second);
+					if(*index.second.rbegin() != '/') {
+						index.second.insert(index.second.length(), "/");
+					}
 					root_dir = index.second;
 				}
 //				logging(DEBUG, "%s", root_dir.c_str());
@@ -95,8 +98,8 @@ namespace config_parse {
 		size_t i;
 		for(i = 0; i < str.length(); i++) {
 			if(str[i] == '/' && str[i+1] == '/') {
-				std::string tmp_str_l = str.substr(0, (i));
-				std::string tmp_str_r = str.substr((i + 1), str.length());
+				std::string &&tmp_str_l = str.substr(0, (i));
+				std::string &&tmp_str_r = str.substr((i + 1), str.length());
 				tmp_str_l += tmp_str_r;
 				str = std::move(tmp_str_l);
 			}
@@ -108,7 +111,7 @@ namespace config_parse {
 				i--;
 			}
 
-			std::string tmp = str.substr(0, i + 1);
+			std::string &&tmp = str.substr(0, i + 1);
 			str.clear();
 			str = std::move(tmp);
 		}
