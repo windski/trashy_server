@@ -28,7 +28,12 @@
 #include <cerrno>
 #include <stdexcept>
 #include <cassert>
-
+#include <ctime>
+#include <memory>
+#include <vector>
+#include <fstream>
+#include <string>
+#include <locale>
 
 #include <cstdarg>
 
@@ -40,6 +45,7 @@
 namespace net {
     const size_t MAXLINE = 102400;
     const size_t MAXQUE = 1024;
+	const size_t BUFLEN = 1024;
     const size_t MAX_EVENT = 50;
     const size_t MAX_URI_LEN = 200;
 

@@ -211,8 +211,12 @@ namespace net {
 
 		logging(DEBUG, "file type is %s", file_T__.c_str());
 
-		sprintf(http_header_buff, "%s %s\r\n%s\r\nContent-Type: text/html\r\n\r\n", \
-		version.c_str(), status_code(response_status), server_name.c_str());
+		rewrite_tool::time_hp tm_stp;
+
+		logging(DEBUG, "%s\n", tm_stp.get_time_stamp_net_std1().c_str());
+
+		sprintf(http_header_buff, "%s %s\r\n%s\r\nContent-Type: text/html\r\nDate:%s\r\n\r\n", \
+		version.c_str(), status_code(response_status), server_name.c_str(), tm_stp.get_time_stamp_net_std1().c_str());
 
 		// 未完待续..!!! 到时候把配置脚本模块写出来, 自动判断文本类型..
 		// 所以现在http header 少了content/type

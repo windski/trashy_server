@@ -504,3 +504,50 @@ std::string rewrite_tool::MD5::to_string()
 	return bytes_to_string(digest(), 16);
 }
 
+
+
+rewrite_tool::time_hp::time_hp()
+{  }
+
+std::string rewrite_tool::time_hp::__get_time_stamp(std::string &&fmt) const
+{
+	time_t t = std::time(NULL);
+	char _tm_buf[net::BUFLEN];
+	memset(&_tm_buf, 0, sizeof(_tm_buf));
+
+	if(strftime(_tm_buf, sizeof(_tm_buf), fmt.c_str(), localtime(&t))) {
+		return std::string(_tm_buf);
+	}
+
+
+	logging(WARN, "Fail to get time stamp.");
+	return std::string("");
+}
+
+// this a c-style string time stamp.
+// such as ` Sun Nov  6 08:49:37 1994 `
+std::string rewrite_tool::time_hp::get_time_stamp_c_style() const
+{
+	std::string time_stamp = __get_time_stamp("%a %b %d %T %Y");
+	return time_stamp;
+}
+
+// RFC 822, updated by RFC 1123 standard..
+// ` Sun, 06 Nov 1994 08:49:37 GMT `
+std::string rewrite_tool::time_hp::get_time_stamp_net_std1() const
+{
+	std::string time_stamp = __get_time_stamp("%a, %d %b %Y %T GMT");
+	return time_stamp;
+}
+
+// RFC 850, obsoleted by RFC 1036 standard.
+// ` Sunday, 06-Nov-94 08:49:37 GMT `
+std::string rewrite_tool::time_hp::get_time_stamp_net_std2() const
+{
+	std::string time_stamp = __get_time_stamp("%A, %d-%b-%y %T GMT");
+	return time_stamp;
+}
+
+rewrite_tool::time_hp::~time_hp()
+{  }
+

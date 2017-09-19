@@ -7,8 +7,6 @@
 
 #include "config.h"
 #include "tool_util.h"
-#include <vector>
-#include <memory>
 
 
 namespace config_parse {

@@ -35,27 +35,27 @@ enum LEVEL { DEBUG, INFO, WARN, ERROR };
 #define DEFAULT_MAXLENGTH 4096
 
 #define format_time_str(fmt_time_str)                                       \
-int format_time_str_len = strlen((fmt_time_str));                           \
-fmt_time_str[format_time_str_len - 1] = '\0'
+    int format_time_str_len = strlen((fmt_time_str));                       \
+    fmt_time_str[format_time_str_len - 1] = '\0'
 
 #define logging_in(level, logging_str)                                                             \
-time_t log_time = time(NULL);                                                                      \
-char *logging_tmp_str = ctime(&log_time);                                                          \
-format_time_str(logging_tmp_str);                                                                  \
-switch(level) {                                                                                    \
-case DEBUG:                                                                                        \
-    printf("[ %s ] %s , %s\n", "DEBUG", logging_tmp_str, (logging_str));break;                     \
-case INFO:                                                                                         \
-    printf("[ %s ]  %s , %s\n", "INFO", logging_tmp_str, (logging_str));break;                     \
-case WARN:                                                                                         \
-    printf("[ %s ]  %s , %s\n", "WARN", logging_tmp_str, (logging_str));break;                     \
-case ERROR:                                                                                        \
-    char logging_char_buff[DEFAULT_MAXLENGTH];                                                     \
-    memset(logging_char_buff, 0, sizeof(logging_char_buff));                                       \
-    sprintf(logging_char_buff, "[ %s ] %s , %s\n", "ERROR", logging_tmp_str, (logging_str));       \
-    fputs(logging_char_buff, stderr);break;                                                        \
-default:break;                                                                                     \
-}                                                                                                  \
+    time_t log_time = time(NULL);                                                                  \
+    char *logging_tmp_str = ctime(&log_time);                                                      \
+    format_time_str(logging_tmp_str);                                                              \
+    switch(level) {                                                                                \
+    case DEBUG:                                                                                    \
+        printf("[ %s ] %s , %s\n", "DEBUG", logging_tmp_str, (logging_str));break;                 \
+    case INFO:                                                                                     \
+        printf("[ %s ]  %s , %s\n", "INFO", logging_tmp_str, (logging_str));break;                 \
+    case WARN:                                                                                     \
+        printf("[ %s ]  %s , %s\n", "WARN", logging_tmp_str, (logging_str));break;                 \
+    case ERROR:                                                                                    \
+        char logging_char_buff[DEFAULT_MAXLENGTH];                                                 \
+        memset(logging_char_buff, 0, sizeof(logging_char_buff));                                   \
+        sprintf(logging_char_buff, "[ %s ] %s , %s\n", "ERROR", logging_tmp_str, (logging_str));   \
+        fputs(logging_char_buff, stderr);break;                                                    \
+    default:break;                                                                                 \
+    }                                                                                              \
 printf("")
 
 // macro 太TMD丑了...
@@ -74,8 +74,8 @@ static void logging(LEVEL level, const char *fmt, ...)
 
         i++;
 
-        // 不要问这里为什么使用if-else 而不用switch
-        // 这里不知不觉的成为了魔幻代码, 不过跟屎一样倒是真的...
+        // 不要问这里为什么跟屎一样, 请先闭嘴, 并继续往下看
+        // 随后你就会发现,你的感觉是真的...
         if(fmt_str[i] == 's') {
             std::string str_l = fmt_str.substr(0, i - 1);
             std::string str_r = fmt_str.substr(i + 1, fmt_str.length());

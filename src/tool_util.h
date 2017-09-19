@@ -4,11 +4,8 @@
 
 #ifndef TRASHY_SERVER_TOOL_UTIL_H
 #define TRASHY_SERVER_TOOL_UTIL_H
-#include <string>
+
 #include "config.h"
-#include <memory>
-#include <vector>
-#include <fstream>
 #include "script_parse.h"
 
 // base of MD5 func.
@@ -132,6 +129,19 @@ namespace rewrite_tool {
 		const byte_t *digest();
 		std::string to_string();
 
+	};
+
+
+	class time_hp
+	{
+	private:
+		inline std::string __get_time_stamp(std::string &&) const;
+	public:
+		time_hp();
+		~time_hp();
+		std::string get_time_stamp_c_style() const;
+		std::string get_time_stamp_net_std1() const;
+		std::string get_time_stamp_net_std2() const;
 	};
 
 } // end of rewrite_tool
