@@ -82,6 +82,7 @@ namespace rewrite_tool {
 //        inline int split_(std::pair<std::string, std::string> &, const std::string &, const char);
         void setting_attrib(std::string &source);
         void get_method(int);
+	    void head_method(int);
 	    inline bool __find_str_s(std::string&, const char ) const;
 	    inline bool check_post_use_get() const;
     public:
@@ -142,6 +143,7 @@ namespace rewrite_tool {
 		std::string get_time_stamp_c_style() const;
 		std::string get_time_stamp_net_std1() const;
 		std::string get_time_stamp_net_std2() const;
+		std::string g_tm_fmt(const char *) const;
 	};
 
 } // end of rewrite_tool

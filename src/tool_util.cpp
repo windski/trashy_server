@@ -163,7 +163,8 @@ int rewrite_tool::http_parse::make_response(int fileno)
 		    // TODO POST methods etc. =_=
 		    break;
 
-
+	    case HEAD:
+		    head_method(fileno);
         default:
             break;
     }
@@ -194,6 +195,14 @@ void rewrite_tool::http_parse::get_method(int sockfd)
 
 
     close(sockfd);
+}
+
+void rewrite_tool::http_parse::head_method(int sockfd)
+{
+	net::HEAD_Respose H_res;
+	H_res.response(sockfd);
+
+	close(sockfd);
 }
 
 bool rewrite_tool::http_parse::check_post_use_get() const

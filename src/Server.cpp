@@ -213,19 +213,17 @@ namespace net {
 
 		rewrite_tool::time_hp tm_stp;
 
-		logging(DEBUG, "%s\n", tm_stp.get_time_stamp_net_std1().c_str());
+//		logging(DEBUG, "%s\n", tm_stp.get_time_stamp_net_std1().c_str());
 
-		sprintf(http_header_buff, "%s %s\r\n%s\r\nContent-Type: text/html\r\nDate:%s\r\n\r\n", \
-		version.c_str(), status_code(response_status), server_name.c_str(), tm_stp.get_time_stamp_net_std1().c_str());
+		sprintf(http_header_buff, "%s %s\r\n%s\r\nContent-Type: text/html\r\nDate:%s\r\n\r\n",
+		        version.c_str(), status_code(response_status), server_name.c_str(),
+		        tm_stp.get_time_stamp_net_std1().c_str());
 
 		// 未完待续..!!! 到时候把配置脚本模块写出来, 自动判断文本类型..
 		// 所以现在http header 少了content/type
 
 		std::string tmp(http_header_buff);
 		memset(buff_, 0, sizeof(buff_));
-
-		// WTF
-		// 突然发现 在发送了http header 之后, 就算是404 还要发送404的页面!!!!
 
 		// 这里其实还有bug, 从文件中读取第二次时有可能覆盖第一次数据..., 不过由于我的测试文件比较小, 没有出现这种现象
 		switch (response_status)
@@ -293,5 +291,39 @@ namespace net {
 		return str.substr(tail_len + 1, tmp_pos__);
 	}
 
+	HEAD_Respose::HEAD_Respose()
+	: base_Respose()
+	{
+
+	}
+
+	HEAD_Respose::HEAD_Respose(std::string & path)
+	: base_Respose(path)
+	{
+
+	}
+
+	HEAD_Respose::~HEAD_Respose()
+	{
+
+	}
+
+	void HEAD_Respose::response(int sockfd)
+	{
+		char buff_[net::MAXLINE];
+		memset(buff_, 0, sizeof(buff_));
+
+		rewrite_tool::time_hp time_ntp;
+		sprintf(http_header_buff, "%s %s\r\n%s\r\nContent-Type: text/html\r\nDate:%s\r\n\r\n",
+		        version.c_str(), status_code(response_status), server_name.c_str(),
+		        time_ntp.get_time_stamp_net_std1());
+
+		memcpy(buff_, http_header_buff, sizeof(buff_));
+		if(write(sockfd, buff_, sizeof(buff_)) != 0) {
+			logging(INFO, "HEAD method send fin..");
+		} else {
+			logging(ERROR, "HEAD method was NOT send correctly..");
+		}
+	}
 
 }

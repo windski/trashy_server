@@ -57,6 +57,15 @@ namespace net {
 		void response(int );
 	};
 
+	class HEAD_Respose : public base_Respose
+	{
+	public:
+		HEAD_Respose();
+		explicit HEAD_Respose(std::string &);
+		~HEAD_Respose();
+		void response(int );
+
+	};
 
     extern void sig_int_Ctrl_c(int sig);
 
