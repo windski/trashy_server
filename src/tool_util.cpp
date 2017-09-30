@@ -518,7 +518,7 @@ std::string rewrite_tool::MD5::to_string()
 rewrite_tool::time_hp::time_hp()
 {  }
 
-std::string rewrite_tool::time_hp::__get_time_stamp(std::string &&fmt) const
+std::string rewrite_tool::time_hp::__get_time_stamp(const std::string &&fmt) const
 {
 	time_t t = std::time(NULL);
 	char _tm_buf[net::BUFLEN];
@@ -555,6 +555,12 @@ std::string rewrite_tool::time_hp::get_time_stamp_net_std2() const
 {
 	std::string time_stamp = __get_time_stamp("%A, %d-%b-%y %T GMT");
 	return time_stamp;
+}
+
+std::string rewrite_tool::time_hp::get_tm_fmt(const char *fmt) const
+{
+	std::string tmp = __get_time_stamp(std::string(fmt));
+	return tmp;
 }
 
 rewrite_tool::time_hp::~time_hp()

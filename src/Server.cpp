@@ -134,7 +134,7 @@ namespace net {
 		http_header_buff = new char[1024];
 		memset(http_header_buff, 0, sizeof(http_header_buff));
 
-		logging(WARN, "config error..");
+//		logging(WARN, "config error..");
 	}
 
 	base_Respose::~base_Respose()
@@ -213,11 +213,11 @@ namespace net {
 
 		rewrite_tool::time_hp tm_stp;
 
-//		logging(DEBUG, "%s\n", tm_stp.get_time_stamp_net_std1().c_str());
+		const char *tm_buf = tm_stp.get_time_stamp_net_std1().c_str();
 
 		sprintf(http_header_buff, "%s %s\r\n%s\r\nContent-Type: text/html\r\nDate:%s\r\n\r\n",
 		        version.c_str(), status_code(response_status), server_name.c_str(),
-		        tm_stp.get_time_stamp_net_std1().c_str());
+		        tm_buf);
 
 		// 未完待续..!!! 到时候把配置脚本模块写出来, 自动判断文本类型..
 		// 所以现在http header 少了content/type
@@ -313,10 +313,14 @@ namespace net {
 		char buff_[net::MAXLINE];
 		memset(buff_, 0, sizeof(buff_));
 
-		rewrite_tool::time_hp time_ntp;
+		rewrite_tool::time_hp tm_ntp;
+		response_status = 200;
+
+		const char *tm_buf = tm_ntp.get_time_stamp_net_std1().c_str();
+
 		sprintf(http_header_buff, "%s %s\r\n%s\r\nContent-Type: text/html\r\nDate:%s\r\n\r\n",
 		        version.c_str(), status_code(response_status), server_name.c_str(),
-		        time_ntp.get_time_stamp_net_std1());
+		        tm_buf);
 
 		memcpy(buff_, http_header_buff, sizeof(buff_));
 		if(write(sockfd, buff_, sizeof(buff_)) != 0) {
@@ -325,5 +329,37 @@ namespace net {
 			logging(ERROR, "HEAD method was NOT send correctly..");
 		}
 	}
+
+
+	PUT_Response::PUT_Response(std::string &path)
+	:base_Respose(path)
+	{
+		char buff_[net::MAXLINE];
+	}
+
+	PUT_Response::~PUT_Response()
+	{
+
+	}cd
+
+	void PUT_Response::response(int sockfd)
+	{
+		char buff_[net::MAXLINE];
+		memset(buff_, 0, sizeof(buff_));
+
+		rewrite_tool::time_hp tm_ntp;
+
+		const char *tm_buf = tm_ntp.get_time_stamp_net_std1().c_str();
+
+		try_write();
+
+
+	}
+
+	void PUT_Response::try_write()
+	{
+
+	}
+	// TODO: finish the part of try_write
 
 }

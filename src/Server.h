@@ -57,6 +57,7 @@ namespace net {
 		void response(int );
 	};
 
+
 	class HEAD_Respose : public base_Respose
 	{
 	public:
@@ -65,6 +66,17 @@ namespace net {
 		~HEAD_Respose();
 		void response(int );
 
+	};
+
+
+	class PUT_Response : public base_Respose
+	{
+	private:
+		void try_write();
+	public:
+		PUT_Response(std::string &);
+		~PUT_Response();
+		void response(int );
 	};
 
     extern void sig_int_Ctrl_c(int sig);

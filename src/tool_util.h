@@ -136,14 +136,14 @@ namespace rewrite_tool {
 	class time_hp
 	{
 	private:
-		inline std::string __get_time_stamp(std::string &&) const;
+		inline std::string __get_time_stamp(const std::string &&) const;
 	public:
 		time_hp();
 		~time_hp();
 		std::string get_time_stamp_c_style() const;
 		std::string get_time_stamp_net_std1() const;
 		std::string get_time_stamp_net_std2() const;
-		std::string g_tm_fmt(const char *) const;
+		std::string get_tm_fmt(const char *) const;
 	};
 
 } // end of rewrite_tool

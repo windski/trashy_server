@@ -37,7 +37,7 @@
 cmake-build-debug/
 
 # my defined files
-test_module
+# test_module
 tags
 build
 
