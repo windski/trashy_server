@@ -340,7 +340,7 @@ namespace net {
 	PUT_Response::~PUT_Response()
 	{
 
-	}cd
+	}
 
 	void PUT_Response::response(int sockfd)
 	{
