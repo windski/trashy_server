@@ -34,6 +34,7 @@
 #include <fstream>
 #include <string>
 #include <locale>
+#include <csetjmp>
 
 #include <cstdarg>
 

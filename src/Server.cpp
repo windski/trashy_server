@@ -126,7 +126,7 @@ namespace net {
     }
 
 
-	base_Respose::base_Respose()
+	base_Response::base_Response()
 			: version(HTTP_VER_STR),
 			  server_name(SERVER_NAME),
 			  route("index.html")
@@ -137,12 +137,12 @@ namespace net {
 //		logging(WARN, "config error..");
 	}
 
-	base_Respose::~base_Respose()
+	base_Response::~base_Response()
 	{
 		delete[] http_header_buff;
 	}
 
-	base_Respose::base_Respose(std::string &path)
+	base_Response::base_Response(std::string &path)
 			: version(HTTP_VER_STR),
 			  server_name(SERVER_NAME),
 			  route(path)
@@ -152,7 +152,55 @@ namespace net {
 
 	}
 
-	int GET_Respose::try_open()
+
+	DEFAULT_Response::DEFAULT_Response()
+	: base_Response()
+	{
+
+	}
+
+	void DEFAULT_Response::response(int sockfd)
+	{
+		response_status = 500;
+
+		rewrite_tool::time_hp tm_stp;
+
+		const char *tm_buf = tm_stp.get_time_stamp_net_std1().c_str();
+
+		sprintf(http_header_buff, "%s %s\r\n%s\r\nContent-Type: text/html\r\nDate:%s\r\n\r\n",
+		        version.c_str(), status_code(response_status), server_name.c_str(),
+		        tm_buf);
+
+		std::string tmp(http_header_buff);
+		char buff_[net::MAXLINE];
+
+		std::fstream file(route, std::ios::in);
+		if(!file.is_open()) {
+			logging(WARN, "%s, %d, %s, %s", __FILE__, __LINE__, "can not open file", route.c_str());
+		} else {
+			while(!file.eof()) {
+				file.read(buff_, sizeof(buff_));
+			}
+
+			std::string file_storage(buff_);
+
+			tmp += file_storage;
+		}
+
+		if(write(sockfd, tmp.c_str(), tmp.size() + 1) != 0) {
+			logging(INFO, "%s send fin.", route.c_str());
+		} else {
+			logging(WARN, "IN %s, %d. from %s can NOT send any pages.", __FILE__, __LINE__, route.c_str());
+		}
+	}
+
+	DEFAULT_Response::~DEFAULT_Response()
+	{
+
+	}
+
+
+	int GET_Response::try_open()
 	{
 		if((fileno = open(route.c_str(), O_RDONLY)) > 0) {
 			response_status = 200;
@@ -199,7 +247,7 @@ namespace net {
 	}
 
 
-	void GET_Respose::response(int sockfd)
+	void GET_Response::response(int sockfd)
 	{
 		ssize_t n = 0;
 		ssize_t sum_n = n;
@@ -225,6 +273,7 @@ namespace net {
 		std::string tmp(http_header_buff);
 		memset(buff_, 0, sizeof(buff_));
 
+		// TODO: clear bugs
 		// 这里其实还有bug, 从文件中读取第二次时有可能覆盖第一次数据..., 不过由于我的测试文件比较小, 没有出现这种现象
 		switch (response_status)
 		{
@@ -262,18 +311,18 @@ namespace net {
 
 	}
 
-	GET_Respose::~GET_Respose()
+	GET_Response::~GET_Response()
 	{
         close(fileno);            // 对已经调用 close 过的 file descriptor 再调用 close 会置errno 为 EBADF.
 	}
 
-	GET_Respose::GET_Respose(std::string &path)
-			: base_Respose(path)
+	GET_Response::GET_Response(std::string &path)
+			: base_Response(path)
 	{
 
 	}
 
-	std::string net::GET_Respose::get_text_file_T(std::string &str) const
+	std::string net::GET_Response::get_text_file_T(std::string &str) const
 	{
 		char parse_buff_[net::MAXLINE];
 		memset(parse_buff_, 0, sizeof(parse_buff_));
@@ -291,24 +340,24 @@ namespace net {
 		return str.substr(tail_len + 1, tmp_pos__);
 	}
 
-	HEAD_Respose::HEAD_Respose()
-	: base_Respose()
+	HEAD_Response::HEAD_Response()
+	: base_Response()
 	{
 
 	}
 
-	HEAD_Respose::HEAD_Respose(std::string & path)
-	: base_Respose(path)
+	HEAD_Response::HEAD_Response(std::string & path)
+	: base_Response(path)
 	{
 
 	}
 
-	HEAD_Respose::~HEAD_Respose()
+	HEAD_Response::~HEAD_Response()
 	{
 
 	}
 
-	void HEAD_Respose::response(int sockfd)
+	void HEAD_Response::response(int sockfd)
 	{
 		char buff_[net::MAXLINE];
 		memset(buff_, 0, sizeof(buff_));
@@ -332,9 +381,9 @@ namespace net {
 
 
 	PUT_Response::PUT_Response(std::string &path)
-	:base_Respose(path)
+	:base_Response(path)
 	{
-		char buff_[net::MAXLINE];
+
 	}
 
 	PUT_Response::~PUT_Response()
@@ -358,6 +407,15 @@ namespace net {
 
 	void PUT_Response::try_write()
 	{
+		std::fstream file(route, std::ios::in);
+		if(file.is_open()) {
+			response_status = 201;
+			file.close();
+			return ;
+		}
+
+		std::fstream exist(route, std::ios::out);
+
 
 	}
 	// TODO: finish the part of try_write

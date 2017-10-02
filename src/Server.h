@@ -25,7 +25,7 @@ namespace net {
     };
 
 
-	class base_Respose
+	class base_Response
 	{
 	protected:
 		std::string version;
@@ -35,14 +35,23 @@ namespace net {
 		size_t response_status;
 
 	public:
-		base_Respose();
-		explicit base_Respose(std::string &);
-		virtual ~base_Respose();
+		base_Response();
+		explicit base_Response(std::string &);
+		virtual ~base_Response();
 		virtual void response(int ) = 0;
 	};
 
 
-	class GET_Respose : public base_Respose
+	class DEFAULT_Response : public base_Response
+	{
+	public:
+		DEFAULT_Response();
+		~DEFAULT_Response();
+		void response(int);
+	};
+
+
+	class GET_Response : public base_Response
 	{
 	private:
 		int fileno;
@@ -52,24 +61,24 @@ namespace net {
 		std::string get_text_file_T(std::string & str) const;
 	public:
 		inline int get_file_handle(void) const { return fileno != 0 ? fileno : 0; }
-		GET_Respose(std::string &);
-		~GET_Respose();
+		GET_Response(std::string &);
+		~GET_Response();
 		void response(int );
 	};
 
 
-	class HEAD_Respose : public base_Respose
+	class HEAD_Response : public base_Response
 	{
 	public:
-		HEAD_Respose();
-		explicit HEAD_Respose(std::string &);
-		~HEAD_Respose();
+		HEAD_Response();
+		explicit HEAD_Response(std::string &);
+		~HEAD_Response();
 		void response(int );
 
 	};
 
 
-	class PUT_Response : public base_Respose
+	class PUT_Response : public base_Response
 	{
 	private:
 		void try_write();

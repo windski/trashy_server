@@ -76,15 +76,20 @@ namespace rewrite_tool {
         enum method { GET, PUT, DELETE, POST, HEAD };
         method request_method;
         std::shared_ptr<std::string> route;
-        std::string host;
+        std::string host_str;
+	    std::string file_type_str;
+	    std::string file_length_str;
     private:
         int split_(std::vector<std::string>&, const std::string &, const std::string&& ) const;
 //        inline int split_(std::pair<std::string, std::string> &, const std::string &, const char);
         void setting_attrib(std::string &source);
+	    void default_method(int);
         void get_method(int);
 	    void head_method(int);
+	    void put_method(int);
 	    inline bool __find_str_s(std::string&, const char ) const;
 	    inline bool check_post_use_get() const;
+	    void set_path();
     public:
         explicit http_parse(char *);
         explicit http_parse(std::string &);

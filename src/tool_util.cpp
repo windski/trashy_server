@@ -108,7 +108,15 @@ void rewrite_tool::http_parse::setting_attrib(std::string &source)
 	    return ;
     } else if(std::regex_search(source, std::regex("(Host:)"))) {
         std::string::size_type index = source.find("Host");
-        host = source.substr(index + 5);
+        host_str = source.substr(index + 5);
+    } else if(std::regex_search(source, std::regex("(Content-length:)"))) {
+	    std::string::size_type index = source.find("length:");
+	    file_length_str = source.substr(index + 8);
+	    logging(DEBUG, "%s %d %s", __FILE__, __LINE__, file_length_str);
+    } else if(std::regex_search(source, std::regex("(Content-type:)"))) {
+	    std::string::size_type index = source.find("type:");
+	    file_type_str = source.substr(index + 6);
+	    logging(DEBUG, "%s, %d, %s", __FILE__, __LINE__, file_type_str);
     }
 
 
@@ -165,13 +173,57 @@ int rewrite_tool::http_parse::make_response(int fileno)
 
 	    case HEAD:
 		    head_method(fileno);
+		    break;
+
+	    case PUT:
+		    put_method(fileno);
+		    break;
+
         default:
+	        default_method(fileno);
             break;
     }
 
 }
 
+void rewrite_tool::http_parse::default_method(int sockfd)
+{
+	net::DEFAULT_Response D_res;
+	D_res.response(sockfd);
+
+	close(sockfd);
+}
+
 void rewrite_tool::http_parse::get_method(int sockfd)
+{
+	set_path();
+
+    net::GET_Response G_res(*route);
+    G_res.response(sockfd);
+
+    close(sockfd);
+}
+
+void rewrite_tool::http_parse::head_method(int sockfd)
+{
+	net::HEAD_Response H_res;
+	H_res.response(sockfd);
+
+	close(sockfd);
+}
+
+void rewrite_tool::http_parse::put_method(int sockfd)
+{
+	set_path();
+
+	net::PUT_Response P_res(*route);
+	P_res.response(sockfd);
+
+	close(sockfd);
+
+}
+
+void rewrite_tool::http_parse::set_path()
 {
 	config_parse::config_file_parse file_path;
 	std::string tmp_path = file_path.get_pages_path();
@@ -189,20 +241,6 @@ void rewrite_tool::http_parse::get_method(int sockfd)
 	}
 
 	route->insert(0, tmp_path);
-
-    net::GET_Respose G_res(*route);
-    G_res.response(sockfd);
-
-
-    close(sockfd);
-}
-
-void rewrite_tool::http_parse::head_method(int sockfd)
-{
-	net::HEAD_Respose H_res;
-	H_res.response(sockfd);
-
-	close(sockfd);
 }
 
 bool rewrite_tool::http_parse::check_post_use_get() const
