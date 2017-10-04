@@ -202,6 +202,9 @@ namespace net {
 
 	int GET_Response::try_open()
 	{
+		config_parse::config_file_parse file_path;
+		std::string tmp_path;
+
 		if((fileno = open(route.c_str(), O_RDONLY)) > 0) {
 			response_status = 200;
 		} else {
@@ -213,6 +216,14 @@ namespace net {
 				case ENXIO:
 					response_status = 500;
 					logging(ERROR, "The file may is a device file. Or O_NONBLOCK | O_WRONLY is set.");
+					// TODO: may delete it, but now...
+					tmp_path = file_path.get_pages_path();
+
+					tmp_path += "500.html";
+
+					if((fileno = open(tmp_path.c_str(), O_RDONLY)) < 0) {
+						logging(WARN, "Can Not find `500.html`, checkout the file.");
+					}
 					break;
 				case EEXIST:
 					// 300 相关?? 不清楚
@@ -235,9 +246,11 @@ namespace net {
 					break;
 				default:
 					response_status = 404;
+
 					if((fileno = open("./404.html", O_RDONLY)) < 0) {
 						logging(WARN, "Can NOT find `404.html`, checkout the file.");
 					}
+
 					break;
 			}
 			return -1;
@@ -273,15 +286,13 @@ namespace net {
 		std::string tmp(http_header_buff);
 		memset(buff_, 0, sizeof(buff_));
 
-		// TODO: clear bugs
-		// 这里其实还有bug, 从文件中读取第二次时有可能覆盖第一次数据..., 不过由于我的测试文件比较小, 没有出现这种现象
 		switch (response_status)
 		{
 			case 200:
 				while((n = read(fileno, (buff_ + sum_n), net::MAXLINE)) > 0) {
 					sum_n += n;
-					if(sum_n > net::MAXLINE) {
-						logging(WARN, "Buff too short OR file too big");
+					if(sum_n >= net::MAXLINE) {
+						logging(WARN, "%s, %d, The file too big", __FILE__, __LINE__);
 						break;
 					}
 				}
@@ -289,11 +300,20 @@ namespace net {
 			case 404:
 				while((n = read(fileno, (buff_ + sum_n), net::MAXLINE)) > 0) {
 					sum_n += n;
-					if(sum_n > net::MAXLINE) {
-						logging(WARN, "Buff too short OR file too big");
+					if(sum_n >= net::MAXLINE) {
+						logging(WARN, "%s, %d, The file too big", __FILE__, __LINE__);
 						break;
 					}
 				}
+			case 500:
+				while((n = read(fileno, (buff_ + sum_n), net::MAXLINE)) > 0) {
+					sum_n += n;
+					if (sum_n >= net::MAXLINE) {
+						logging(WARN, "%s, %d, The file too big", __FILE__, __LINE__);
+						break;
+					}
+				}
+				break;
 			default:           // The others http status codes
 				logging(WARN, "Not send any pages.");
 				break;
@@ -402,6 +422,15 @@ namespace net {
 
 		try_write();
 
+		sprintf(http_header_buff, "%s %s\r\n%s\r\nContent-Type: text/html\r\nDate:%s\r\n\r\n",
+		        version.c_str(), status_code(response_status), server_name.c_str(),
+		        tm_buf);
+
+		if(write(sockfd, http_header_buff, sizeof(http_header_buff)) != 0) {
+			logging(INFO, "http response send finish.");
+		} else {
+			logging(WARN, "socket write error, NOT send http header.");
+		}
 
 	}
 

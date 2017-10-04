@@ -28,12 +28,20 @@ namespace config_parse {
 	std::string config_file_parse::get_static_path(void)
 	{
 		parse_setting();
+
+		if(*static_path.rbegin() != '/')
+			static_path.insert(static_path.length(), "/");
+
 		return static_path;
 	}
 
 	std::string config_file_parse::get_pages_path(void)
 	{
 		parse_setting();
+
+		if(*pages_path.rbegin() != '/')
+			pages_path.insert(pages_path.length(), "/");
+
 		return pages_path;
 	}
 
