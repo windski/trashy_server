@@ -4,6 +4,7 @@
 
 #include "Server.h"
 #include "status_code.h"
+#include "templates/search_dir.hxx"
 
 namespace net {
 
@@ -305,6 +306,7 @@ namespace net {
 						break;
 					}
 				}
+				break;
 			case 500:
 				while((n = read(fileno, (buff_ + sum_n), net::MAXLINE)) > 0) {
 					sum_n += n;
@@ -436,15 +438,8 @@ namespace net {
 
 	void PUT_Response::try_write()
 	{
-		std::fstream file(route, std::ios::in);
-		if(file.is_open()) {
-			response_status = 201;
-			file.close();
-			return ;
-		}
 
-		std::fstream exist(route, std::ios::out);
-
+//		rewrite_tool::search_dir();
 
 	}
 	// TODO: finish the part of try_write

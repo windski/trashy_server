@@ -228,9 +228,6 @@ void rewrite_tool::http_parse::set_path()
 	config_parse::config_file_parse file_path;
 	std::string tmp_path = file_path.get_pages_path();
 
-	if(*tmp_path.rbegin() != '/')
-		tmp_path.insert(tmp_path.length(), "/");
-
 	if(*route == "/") {
 		route->clear();
 		(*route) = "index.html";

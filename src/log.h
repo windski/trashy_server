@@ -13,11 +13,16 @@
 #include <cstdlib>
 #include <unistd.h>
 
+#ifndef __GNUC__
+# define __attribute__(x)
+#endif
+
 // Just write some functions. The functions was based on printf.
 // forget that..
 
 enum LEVEL { DEBUG, INFO, WARN, ERROR };
 
+static void logging(LEVEL level, const char *fmt, ...) __attribute__((format(printf, (2), (3))));
 
 /**
  * ctime 返回的字符串有点迷! 才醒悟...尴尬, 最后的非打印字符是\n\0 ,下面是strlen 的标准库实现
