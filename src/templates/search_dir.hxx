@@ -7,8 +7,10 @@
 #ifndef TRASHY_SERVER_SEARCH_DIR_HXX
 #define TRASHY_SERVER_SEARCH_DIR_HXX
 
-#include "../config.h"
+//#include "../config.h"
 #include <stack>
+#include <dirent.h>
+#include "../log.h"
 
 namespace rewrite_tool
 {
@@ -48,18 +50,19 @@ namespace rewrite_tool
 		}
 	};
 
-	template <typename T>
-	void close_all_dir(T & stack_p)
+
+	template <typename T = DIR *>
+	void close_all_dir(std::stack<T> stack_p)
 	{
-		for(auto i : stack_p) {
-			closedir(i);
+		while(stack_p.empty()) {
+			closedir(stack_p.top());
+			stack_p.pop();
 		}
 	}
 
 	template <typename T>
-	inline int search_dir(T & tmp_dir_n, T & target_name)
+	inline int search_dir(T tmp_dir_n, T target_name)
 	{
-		typedef typename srch_t<T>::srch_base_t srch_base_t;
 
 		srch_t<T> trait_dir_1;
 		std::string dir_s = trait_dir_1.init(tmp_dir_n);
@@ -81,6 +84,9 @@ namespace rewrite_tool
 			if(((drent = readdir(dr)) != nullptr) && (drent->d_type == DT_DIR)) {
 				stack_cp.push(dr);
 
+				// 这里要重新打开文件夹需要先关闭上一个打开的文件夹...试了好久...
+				// 明天去学校改...睡觉
+				// TODO: fix bug here!!
 				if((dr = opendir(drent->d_name)) == nullptr) {
 					logging(ERROR, "%s, %d, The dir '%s' can NOT open", __FILE__, __LINE__, dir_s.c_str());
 					return -1;
@@ -95,7 +101,7 @@ namespace rewrite_tool
 
 			}
 
-		} while(drent == nullptr);
+		} while(drent != nullptr);
 
 		if(!stack_cp.empty()) {
 			dr = stack_cp.top();
