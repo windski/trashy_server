@@ -439,7 +439,7 @@ namespace net {
 	void PUT_Response::try_write()
 	{
 
-//		rewrite_tool::search_dir();
+//		rewrite_tool::search_file();
 
 	}
 	// TODO: finish the part of try_write

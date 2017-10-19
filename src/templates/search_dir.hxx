@@ -11,6 +11,7 @@
 #include <stack>
 #include <dirent.h>
 #include "../log.h"
+#include <cstring>
 
 namespace rewrite_tool
 {
@@ -51,68 +52,77 @@ namespace rewrite_tool
 	};
 
 
-	template <typename T = DIR *>
-	void close_all_dir(std::stack<T> stack_p)
-	{
-		while(stack_p.empty()) {
-			closedir(stack_p.top());
-			stack_p.pop();
-		}
-	}
+    int list_them(std::string &path, std::string &target, bool check_all = true)
+    {
+        struct dirent *entry = nullptr;
+        DIR * dp = opendir(path.c_str());
+        if(dp == nullptr) {
+            logging(ERROR, "%s open Failure  ==>  %s, %d", path.c_str(), __FILE__, __LINE__);
+            return 1;
+        }
+
+        std::string current_dir = path;
+        if(*current_dir.rbegin() != '/')
+            current_dir.insert(current_dir.length(), "/");
+
+        while((entry = readdir(dp))) {
+            if((strcmp(entry->d_name, ".") == 0) || (strcmp(entry->d_name, "..") == 0)) {
+                continue;
+            }
+
+            if(entry->d_type != DT_DIR) {
+                if(check_all) {
+                    std::string tmp(entry->d_name);
+                    return tmp == target ? 0 : 1;
+                } else {
+                    std::string::size_type tmp_index;
+                    std::string::size_type tgt_index;
+                    std::string tmp(entry->d_name);
+
+                    tmp_index = tmp.rfind(".");
+                    tgt_index = target.rfind(".");
+
+                    std::string sub_tmp = tmp.substr(0, tmp_index);
+                    std::string sub_tgt = target.substr(0, tgt_index);
+
+                    return sub_tmp == sub_tgt ? 0 : 1;
+                }
+            } else {
+                std::string next_dir(entry->d_name);
+                std::string tmp = current_dir + next_dir;
+
+                if(check_all) {
+                    list_them(tmp, target);
+                } else {
+                    list_them(tmp, target, false);
+                }
+            }
+        }
+
+        closedir(dp);
+
+        return 1;
+    }
 
 	template <typename T>
-	inline int search_dir(T tmp_dir_n, T target_name)
+	inline int search_file(T dir, T target)
 	{
+		srch_t<T> trait_dir;
+		std::string dir_s = trait_dir.init(dir);
+		std::string tg_name_s = trait_dir.init(target);
 
-		srch_t<T> trait_dir_1;
-		std::string dir_s = trait_dir_1.init(tmp_dir_n);
-		std::string tg_name_s = trait_dir_1.init(target_name);
-
-		DIR *dr = nullptr;
-		if((dr = opendir(dir_s.c_str())) == nullptr) {
-			logging(ERROR, "%s, %d, The dir '%s' can NOT open", __FILE__, __LINE__, dir_s.c_str());
-			return -1;
-		}
-
-		struct dirent *drent = nullptr;
-
-		std::stack<DIR *>stack_cp;
-
-		again:         // first to use goto label...
-		do {
-
-			if(((drent = readdir(dr)) != nullptr) && (drent->d_type == DT_DIR)) {
-				stack_cp.push(dr);
-
-				// 这里要重新打开文件夹需要先关闭上一个打开的文件夹...试了好久...
-				// 明天去学校改...睡觉
-				// TODO: fix bug here!!
-				if((dr = opendir(drent->d_name)) == nullptr) {
-					logging(ERROR, "%s, %d, The dir '%s' can NOT open", __FILE__, __LINE__, dir_s.c_str());
-					return -1;
-				}
-				continue;
-			} else {
-				if(strcmp((drent->d_name), tg_name_s.c_str()) == 0) {
-					closedir(dr);
-					close_all_dir(stack_cp);
-					return 0;
-				}
-
-			}
-
-		} while(drent != nullptr);
-
-		if(!stack_cp.empty()) {
-			dr = stack_cp.top();
-			stack_cp.pop();
-			goto again;
-		}
-
-		return 1;
+        return list_them(dir_s, tg_name_s);      // 真正的搜索 <= 蛤 ?
 	}
 
+    template <typename T>
+    inline int search_file_ignore_extension(T dir, T target)
+    {
+        srch_t<T> trait_dir;
+        std::string dir_s = trait_dir.init(dir);
+        std::string tg_s = trait_dir.init(target);
 
+        return list_them(dir_s, tg_s, false);
+    }
 
 }     // end of rewrite_tool
 
