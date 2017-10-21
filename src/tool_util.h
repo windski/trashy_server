@@ -74,6 +74,7 @@ namespace rewrite_tool {
     private:
         int version;
         enum method { GET, PUT, DELETE, POST, HEAD };
+	    std::string origin_data;
         method request_method;
         std::shared_ptr<std::string> route;
         std::string host_str;
@@ -86,7 +87,7 @@ namespace rewrite_tool {
 	    void default_method(int);
         void get_method(int);
 	    void head_method(int);
-	    void put_method(int);
+	    void put_method(int, std::string &);
 	    inline bool __find_str_s(std::string&, const char ) const;
 	    inline bool check_post_use_get() const;
 	    void set_path();
@@ -150,6 +151,18 @@ namespace rewrite_tool {
 		std::string get_time_stamp_net_std2() const;
 		std::string get_tm_fmt(const char *) const;
 	};
+
+	namespace utils {
+		class Uncopyable {
+		private:
+			Uncopyable(const Uncopyable &);
+			Uncopyable & operator=(const Uncopyable &);
+		protected:
+			Uncopyable() {  }
+			virtual ~Uncopyable() {  }
+		};
+
+	}  // end of utils
 
 } // end of rewrite_tool
 #endif //TRASHY_SERVER_MY_STR_H

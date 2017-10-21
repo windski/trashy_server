@@ -48,7 +48,7 @@ namespace net {
     {
         // TODO: release the memory that alloc
         // 先直接返回.. 后面再说..(埋个坑)
-        return ;
+        exit(1);
     }
 
     int Server::run()
@@ -70,7 +70,7 @@ namespace net {
         }
 
         void sig_int_Ctrl_c(int);
-
+	    signal(SIGINT, sig_int_Ctrl_c);
         while(true) {
             if((nfds = epoll_wait(epollfd, events, MAX_EVENT, -1)) == -1) {
                 perror("epoll_wait error");
@@ -104,8 +104,7 @@ namespace net {
             }
 
         }
-        signal(SIGINT, sig_int_Ctrl_c);
-        return 0;
+
     }
 
 
@@ -403,7 +402,18 @@ namespace net {
 
 
 	PUT_Response::PUT_Response(std::string &path)
-	:base_Response(path)
+	:base_Response(path),
+	 request_data(),
+	 target_file()
+	{
+
+	}
+
+
+	PUT_Response::PUT_Response(std::string &path, std::string &data)
+	: base_Response(path),
+	  request_data(data),
+	  target_file()
 	{
 
 	}
@@ -438,10 +448,63 @@ namespace net {
 
 	void PUT_Response::try_write()
 	{
+		set_page_data();
 
-//		rewrite_tool::search_file();
+		config_parse::config_file_parse file_path;
+		std::string search_root = file_path.get_pages_path();
+
+		from_route_get_name(target_file);
+
+		if(rewrite_tool::search_file(search_root, target_file)) {
+
+			update_page_data(search_root, page_data);
+			response_status = 204;
+		} else {
+//			update_page_data(page_data);
+			response_status = 201;
+		}
 
 	}
-	// TODO: finish the part of try_write
+
+	void PUT_Response::set_page_data()
+	{
+		std::string::size_type ssize;
+		ssize = request_data.rfind("\r\n\r\n");
+		page_data = std::move(request_data.substr(ssize, request_data.length()));
+	}
+
+	void PUT_Response::from_route_get_name(std::string &target)
+	{
+		std::string::size_type ssize;
+		if(*target.rbegin() != '/') {
+			ssize = target.rfind('/');
+			std::string && tmp = target.substr(ssize - 1, target.length());
+			target.clear();
+			target = tmp;
+		} else {
+			ssize = target.rfind('/');
+			std::string && tmp = target.substr(ssize - 1, target.length() - 1);
+			target.clear();
+			target = tmp;
+		}
+	}
+
+	int PUT_Response::update_page_data(const std::string & root_dir, const std::string & data) const
+	{
+		std::string target = root_dir + target_file;
+		std::fstream file(target, std::ios::out);
+
+		if(!file.is_open()) {
+			logging(ERROR, "Oops! target file %s can't be open.", target.c_str());
+			throw std::runtime_error("Target file can't be open..");
+		}
+
+		// TODO: checkout here...
+	}
+
+	int PUT_Response::create_page_data(const std::string & root_dir, const std::string& data) const
+	{
+
+	}
 
 }

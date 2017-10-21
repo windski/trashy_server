@@ -15,6 +15,13 @@
 
 namespace rewrite_tool
 {
+
+	namespace utils {
+
+		bool file_found;
+
+	}  // end of utils
+
 	template <typename T>
 	class srch_t;
 
@@ -52,13 +59,13 @@ namespace rewrite_tool
 	};
 
 
-    int list_them(std::string &path, std::string &target, bool check_all = true)
+    void list_them(std::string &path, std::string &target, bool check_all = true)
     {
         struct dirent *entry = nullptr;
         DIR * dp = opendir(path.c_str());
         if(dp == nullptr) {
             logging(ERROR, "%s open Failure  ==>  %s, %d", path.c_str(), __FILE__, __LINE__);
-            return 1;
+            throw std::runtime_error("Directory failure");
         }
 
         std::string current_dir = path;
@@ -73,7 +80,9 @@ namespace rewrite_tool
             if(entry->d_type != DT_DIR) {
                 if(check_all) {
                     std::string tmp(entry->d_name);
-                    return tmp == target ? 0 : 1;
+	                if(tmp == target) {
+		                utils::file_found = true;
+	                }
                 } else {
                     std::string::size_type tmp_index;
                     std::string::size_type tgt_index;
@@ -85,7 +94,9 @@ namespace rewrite_tool
                     std::string sub_tmp = tmp.substr(0, tmp_index);
                     std::string sub_tgt = target.substr(0, tgt_index);
 
-                    return sub_tmp == sub_tgt ? 0 : 1;
+	                if(sub_tmp == sub_tgt) {
+		                utils::file_found = true;
+	                }
                 }
             } else {
                 std::string next_dir(entry->d_name);
@@ -101,27 +112,31 @@ namespace rewrite_tool
 
         closedir(dp);
 
-        return 1;
     }
 
 	template <typename T>
-	inline int search_file(T dir, T target)
+	inline bool search_file(T dir, T target)
 	{
 		srch_t<T> trait_dir;
 		std::string dir_s = trait_dir.init(dir);
 		std::string tg_name_s = trait_dir.init(target);
 
-        return list_them(dir_s, tg_name_s);      // 真正的搜索 <= 蛤 ?
+		utils::file_found = false;
+		list_them(dir_s, tg_name_s);
+		return utils::file_found;
 	}
 
     template <typename T>
-    inline int search_file_ignore_extension(T dir, T target)
+    inline bool search_file_ignore_extension(T dir, T target)
     {
         srch_t<T> trait_dir;
         std::string dir_s = trait_dir.init(dir);
         std::string tg_s = trait_dir.init(target);
 
-        return list_them(dir_s, tg_s, false);
+	    utils::file_found = false;
+	    list_them(dir_s, tg_s, false);
+	    return utils::file_found;
+
     }
 
 }     // end of rewrite_tool

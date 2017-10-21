@@ -35,6 +35,7 @@
 #include <string>
 #include <locale>
 #include <csetjmp>
+#include <algorithm>
 
 #include <cstdarg>
 

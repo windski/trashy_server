@@ -25,7 +25,7 @@ namespace net {
     };
 
 
-	class base_Response
+	class base_Response : private rewrite_tool::utils::Uncopyable
 	{
 	protected:
 		std::string version;
@@ -81,9 +81,18 @@ namespace net {
 	class PUT_Response : public base_Response
 	{
 	private:
+		std::string request_data;
+		std::string page_data;
+		std::string target_file;
+	private:
 		void try_write();
+		void set_page_data();
+		void from_route_get_name(std::string &);
+		int update_page_data(const std::string &, const std::string &) const;
+		int create_page_data(const std::string &, const std::string &) const;
 	public:
-		PUT_Response(std::string &);
+		explicit PUT_Response(std::string &);
+		PUT_Response(std::string &, std::string &);
 		~PUT_Response();
 		void response(int );
 	};

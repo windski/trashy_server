@@ -30,6 +30,7 @@ rewrite_tool::my_str::my_str(char *str)
 
 
 rewrite_tool::http_parse::http_parse(char * http_str)
+: origin_data(http_str)
 {
 	assert(http_str != nullptr);
     std::string tmp_str(http_str);
@@ -52,6 +53,7 @@ rewrite_tool::http_parse::http_parse(char * http_str)
 }
 
 rewrite_tool::http_parse::http_parse(std::string & str)
+: origin_data(str)
 {
 	// Thinking by my toe, may has a bug here..
 	size_t str_len = str.length();
@@ -176,7 +178,7 @@ int rewrite_tool::http_parse::make_response(int fileno)
 		    break;
 
 	    case PUT:
-		    put_method(fileno);
+		    put_method(fileno, origin_data);
 		    break;
 
         default:
@@ -212,11 +214,11 @@ void rewrite_tool::http_parse::head_method(int sockfd)
 	close(sockfd);
 }
 
-void rewrite_tool::http_parse::put_method(int sockfd)
+void rewrite_tool::http_parse::put_method(int sockfd, std::string &tmp)
 {
 	set_path();
 
-	net::PUT_Response P_res(*route);
+	net::PUT_Response P_res(*route, tmp);
 	P_res.response(sockfd);
 
 	close(sockfd);
