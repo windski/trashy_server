@@ -115,16 +115,16 @@ namespace rewrite_tool
     }
 
 	template <typename T>
-	inline bool search_file(T dir, T target)
-	{
-		srch_t<T> trait_dir;
-		std::string dir_s = trait_dir.init(dir);
-		std::string tg_name_s = trait_dir.init(target);
+    inline bool search_file(T dir, T target)
+    {
+        srch_t<T> trait_dir;
+        std::string dir_s = trait_dir.init(dir);
+        std::string tg_name_s = trait_dir.init(target);
 
-		utils::file_found = false;
-		list_them(dir_s, tg_name_s);
-		return utils::file_found;
-	}
+        utils::file_found = false;
+        list_them(dir_s, tg_name_s);
+        return utils::file_found;
+    }
 
     template <typename T>
     inline bool search_file_ignore_extension(T dir, T target)

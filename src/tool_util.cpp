@@ -170,7 +170,7 @@ int rewrite_tool::http_parse::make_response(int fileno)
             break;
 
 	    case POST:
-		    // TODO POST methods etc. =_=
+		    post_method(fileno);
 		    break;
 
 	    case HEAD:
@@ -202,6 +202,14 @@ void rewrite_tool::http_parse::get_method(int sockfd)
 
     net::GET_Response G_res(*route);
     G_res.response(sockfd);
+
+    close(sockfd);
+}
+
+void rewrite_tool::http_parse::post_method(int sockfd)
+{
+    net::POST_Response P_res;
+    P_res.response(sockfd);
 
     close(sockfd);
 }

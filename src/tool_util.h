@@ -88,6 +88,7 @@ namespace rewrite_tool {
         void get_method(int);
 	    void head_method(int);
 	    void put_method(int, std::string &);
+        void post_method(int);
 	    inline bool __find_str_s(std::string&, const char ) const;
 	    inline bool check_post_use_get() const;
 	    void set_path();

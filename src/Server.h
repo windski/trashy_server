@@ -67,6 +67,19 @@ namespace net {
 	};
 
 
+    class POST_Response : public base_Response
+    {
+    private:
+        enum enc_t{ urlencode, form_data, plain, unknown_type };
+        enc_t enctype;
+    public:
+        POST_Response();
+        POST_Response(std::string &);
+        ~POST_Response();
+        void response(int );
+    };
+
+
 	class HEAD_Response : public base_Response
 	{
 	public:
@@ -89,7 +102,6 @@ namespace net {
 		void set_page_data();
 		void from_route_get_name(std::string &);
 		int update_page_data(const std::string &, const std::string &) const;
-		int create_page_data(const std::string &, const std::string &) const;
 	public:
 		explicit PUT_Response(std::string &);
 		PUT_Response(std::string &, std::string &);

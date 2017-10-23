@@ -361,6 +361,31 @@ namespace net {
 		return str.substr(tail_len + 1, tmp_pos__);
 	}
 
+    // TODO: finish POST response
+    POST_Response::POST_Response()
+    : enctype(urlencode)
+    {
+
+    }
+
+    POST_Response::POST_Response(std::string & _enctype)
+    {
+        if(*_enctype.rbegin() == 'd') {
+            enctype = urlencode;
+        } else if(*_enctype.rbegin() == 'a') {
+            enctype = form_data;
+        } else if(*_enctype.rbegin() == 'n') {
+            enctype = plain;
+        } else {
+            enctype = unknown_type;
+        }
+    }
+
+    void POST_Response::response(int sockfd)
+    {
+
+    }
+
 	HEAD_Response::HEAD_Response()
 	: base_Response()
 	{
@@ -434,9 +459,9 @@ namespace net {
 
 		try_write();
 
-		sprintf(http_header_buff, "%s %s\r\n%s\r\nContent-Type: text/html\r\nDate:%s\r\n\r\n",
+		sprintf(http_header_buff, "%s %s\r\n%s\r\nContent-Location:%s\r\nDate:%s\r\n\r\n",
 		        version.c_str(), status_code(response_status), server_name.c_str(),
-		        tm_buf);
+		        route.c_str(), tm_buf);
 
 		if(write(sockfd, http_header_buff, sizeof(http_header_buff)) != 0) {
 			logging(INFO, "http response send finish.");
@@ -456,11 +481,21 @@ namespace net {
 		from_route_get_name(target_file);
 
 		if(rewrite_tool::search_file(search_root, target_file)) {
+            try {
+                update_page_data(search_root, page_data);
+            } catch (std::runtime_error &e) {
+                response_status = 500;
+                return ;
+            }
 
-			update_page_data(search_root, page_data);
 			response_status = 204;
 		} else {
-//			update_page_data(page_data);
+			try {
+                update_page_data(search_root, page_data);
+            } catch (std::runtime_error &e) {
+                response_status = 500;
+                return ;
+            }
 			response_status = 201;
 		}
 
@@ -499,12 +534,9 @@ namespace net {
 			throw std::runtime_error("Target file can't be open..");
 		}
 
-		// TODO: checkout here...
-	}
-
-	int PUT_Response::create_page_data(const std::string & root_dir, const std::string& data) const
-	{
-
+        file << data;
+        file.close();
+        return 0;
 	}
 
 }
