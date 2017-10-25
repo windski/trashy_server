@@ -363,12 +363,30 @@ namespace net {
 
     // TODO: finish POST response
     POST_Response::POST_Response()
-    : enctype(urlencode)
+    : enctype(unknown_type),
+      fdatas(),
+      fdatas_pair()
     {
 
     }
 
     POST_Response::POST_Response(std::string & _enctype)
+    : enctype(unknown_type),
+      fdatas(),
+      fdatas_pair()
+    {
+        init_enctype(_enctype);
+    }
+
+    POST_Response::POST_Response(std::string & _enctype, std::string & forms)
+    : enctype(unknown_type),
+      fdatas(forms),
+      fdatas_pair()
+    {
+        init_enctype(_enctype);
+    }
+
+    void POST_Response::init_enctype(std::string & _enctype) noexcept
     {
         if(*_enctype.rbegin() == 'd') {
             enctype = urlencode;
@@ -383,8 +401,24 @@ namespace net {
 
     void POST_Response::response(int sockfd)
     {
+        char buff[net::MAXLINE];
+        parse_post_form();
+    }
+
+
+    void POST_Response::parse_post_form()
+    {
+        // TODO: here
+//        std::string::size_type lhs, rhs;
+//        lhs = 0;
 
     }
+
+    POST_Response::~POST_Response()
+    {
+
+    }
+
 
 	HEAD_Response::HEAD_Response()
 	: base_Response()

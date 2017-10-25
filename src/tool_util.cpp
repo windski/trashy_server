@@ -89,7 +89,7 @@ rewrite_tool::http_parse::~http_parse()
 
 void rewrite_tool::http_parse::setting_attrib(std::string &source)
 {
-	// TODO: 用switch 有bug
+	// 用switch 有bug, 迫不得已
     if(std::regex_search(source, std::regex("(GET)"))) {
         request_method = GET;
 	    return ;
@@ -178,7 +178,7 @@ int rewrite_tool::http_parse::make_response(int fileno)
 		    break;
 
 	    case PUT:
-		    put_method(fileno, origin_data);
+		    put_method(fileno);
 		    break;
 
         default:
@@ -208,8 +208,12 @@ void rewrite_tool::http_parse::get_method(int sockfd)
 
 void rewrite_tool::http_parse::post_method(int sockfd)
 {
-    net::POST_Response P_res;
-    P_res.response(sockfd);
+    net::POST_Response PO_res(file_type_str);
+    PO_res.response(sockfd);
+
+    std::vector<std::string> form_var;
+    split_(form_var, origin_data, "\r\n\r\n");
+
 
     close(sockfd);
 }
@@ -222,12 +226,12 @@ void rewrite_tool::http_parse::head_method(int sockfd)
 	close(sockfd);
 }
 
-void rewrite_tool::http_parse::put_method(int sockfd, std::string &tmp)
+void rewrite_tool::http_parse::put_method(int sockfd)
 {
 	set_path();
 
-	net::PUT_Response P_res(*route, tmp);
-	P_res.response(sockfd);
+	net::PUT_Response PU_res(*route, origin_data);
+	PU_res.response(sockfd);
 
 	close(sockfd);
 

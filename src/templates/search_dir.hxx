@@ -19,8 +19,22 @@ namespace rewrite_tool
 	namespace utils {
 
 		bool file_found;
+        typedef std::stack<DIR *> storage_t;
+        storage_t storage_root;
 
 	}  // end of utils
+
+
+    void release_dir()
+    {
+        using namespace utils;
+        while(!storage_root.empty()) {
+            DIR * tmp = storage_root.top();
+            closedir(tmp);
+            storage_root.pop();
+        }
+    }
+
 
 	template <typename T>
 	class srch_t;
@@ -103,14 +117,14 @@ namespace rewrite_tool
                 std::string tmp = current_dir + next_dir;
 
                 if(check_all) {
+                    utils::storage_root.push(dp);
                     list_them(tmp, target);
                 } else {
+                    utils::storage_root.push(dp);
                     list_them(tmp, target, false);
                 }
             }
         }
-
-        closedir(dp);
 
     }
 
@@ -123,6 +137,8 @@ namespace rewrite_tool
 
         utils::file_found = false;
         list_them(dir_s, tg_name_s);
+        release_dir();
+
         return utils::file_found;
     }
 
@@ -135,6 +151,8 @@ namespace rewrite_tool
 
 	    utils::file_found = false;
 	    list_them(dir_s, tg_s, false);
+        release_dir();
+
 	    return utils::file_found;
 
     }

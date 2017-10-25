@@ -72,11 +72,20 @@ namespace net {
     private:
         enum enc_t{ urlencode, form_data, plain, unknown_type };
         enc_t enctype;
+        std::vector<std::pair<std::string, std::string>> fdatas_pair;
+        std::string fdatas;
+
+    private:
+        void parse_post_form();
+        void init_enctype(std::string &) noexcept;
+
     public:
         POST_Response();
         POST_Response(std::string &);
+        POST_Response(std::string &, std::string &);
         ~POST_Response();
         void response(int );
+
     };
 
 
