@@ -121,45 +121,6 @@ void rewrite_tool::http_parse::setting_attrib(std::string &source)
 	    logging(DEBUG, "%s, %d, %s", __FILE__, __LINE__, file_type_str);
     }
 
-
-//
-//	std::string::size_type index;
-//
-//	char line_1st = source[0];
-//	char line_2nd = source[1];
-//
-//	switch(line_1st) {
-//		case 'G':
-//			// GET
-//			request_method = GET;
-//			break;
-//		case 'P':
-//			// POST
-//			request_method = POST;
-//			break;
-//		case 'D':
-//			// DELETE
-//			request_method = DELETE;
-//			break;
-//		case 'H':
-//			switch(line_2nd) {
-//				case 'E':
-//					// HEAD
-//					request_method = HEAD;
-//					break;
-//				case 'o':
-//					// Host
-//					index = source.find("HOST");
-//					host = source.substr(index + 6);
-//					break;
-//				default:
-//					break;
-//			}
-//			break;
-//		default:
-//			break;
-//	}
-
 }
 
 int rewrite_tool::http_parse::make_response(int fileno)
