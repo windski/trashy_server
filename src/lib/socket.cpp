@@ -36,10 +36,20 @@ void address::setport(const int port)
     m_sockaddr_4.sin_port = ::htons(port);
 }
 
+const struct sockaddr_in &
+    address::getaddr() const
+{
+    return m_sockaddr_4;
+}
+
 address::~address()
-{}
+{
+}
+
 
 } // end of privatedomain
+
+
 
 socket::socket()
 : m_fd(-1), m_addr()
@@ -63,7 +73,7 @@ void socket::setport(int port)
 
 int socket::bind()
 {
-    // TODO: ...
+    return ::bind(m_fd, (struct sockaddr *)(&m_addr.getaddr()), sizeof(struct sockaddr));
 }
 
 void socket::setnonblock() noexcept
@@ -81,6 +91,8 @@ void socket::setnonblock() noexcept
 }
 
 socket::~socket()
-{}
+{
+
+}
 
 }

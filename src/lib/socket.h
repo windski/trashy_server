@@ -33,6 +33,7 @@ public:
     void setip(const char *ip);
     void setport(int port);
     address(const char *ip, int port);
+    const struct sockaddr_in &getaddr() const;
     ~address();
 };
 
