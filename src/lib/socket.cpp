@@ -51,11 +51,6 @@ address::~address()
 
 
 
-socket::socket()
-: m_fd(-1), m_addr()
-{
-}
-
 socket::socket(sa_family_t fm, int type, int protocol)
 : m_addr(), m_fd(::socket(fm, type, protocol))
 {
@@ -76,23 +71,33 @@ int socket::bind()
     return ::bind(m_fd, (struct sockaddr *)(&m_addr.getaddr()), sizeof(struct sockaddr));
 }
 
-void socket::setnonblock() noexcept
+int socket::listen()
 {
+    return ::listen(m_fd, 1024);
+}
+
+socket::~socket()
+{
+    ::shutdown(m_fd, SHUT_RDWR);
+    close(m_fd);
+}
+
+void setnonblocking(int fd)
+{
+    assert(fd > 0);
     int flag;
-    if((flag = fcntl(m_fd, F_GETFL)) < 0) {
+    if((flag = fcntl(fd, F_GETFL)) < 0) {
         perror("get m_fd failure");
         return ;
     }
 
-    if(fcntl(m_fd, F_SETFL, flag) < 0) {
+    flag |= O_NONBLOCK;
+
+    if(fcntl(fd, F_SETFL, flag) < 0) {
         perror("set m_fd failure");
         return ;
     }
 }
 
-socket::~socket()
-{
-
-}
 
 }

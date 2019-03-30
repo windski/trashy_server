@@ -10,6 +10,9 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <strings.h>
+#include <fcntl.h>
+#include <cstdio>
+#include <cassert>
 
 namespace net {
 
@@ -45,15 +48,17 @@ private:
     int m_fd;
     privatedomain::address m_addr;
 public:
-    socket();
     socket(sa_family_t fm, int type, int protocol);
     void setip(const char *ip);
     void setport(int port);
-    void setnonblock() noexcept;
     int bind();
+    int listen();
+    int getfd() const { return m_fd; }
     ~socket();
 };
 
+
+void setnonblocking(int fd);
 
 } // end of net
 
