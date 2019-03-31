@@ -1,8 +1,6 @@
 # trashy_server
 nothing...
-it's a ......
 
-homework
 
 ---------------------
 
