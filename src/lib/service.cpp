@@ -17,7 +17,7 @@ service::service(int port)
     m_listen.set<service, &service::listen_accept>(this);
     m_listen.start(m_sock.getfd(), ev::READ);
 
-    m_sig.set<&service::signal_cb>(this);
+    m_sig.set<&service::signal_cb>();
     m_sig.start(SIGINT);
 }
 
@@ -44,6 +44,7 @@ void service::listen_accept(ev::io &w, int revents)
     socklen_t socklen = sizeof(struct sockaddr_in);
 
     int fd = accept(w.fd, (struct sockaddr *)(&cliaddr.getaddr()), &socklen);
+    printf("got a peer.\n");
 
     if(fd < 0) {
         perror("accept error");
@@ -85,18 +86,51 @@ void serviceinstance::callback(ev::io &w, int revents)
         write_cb(w);
     }
 
-    // TODO: need a buffer.
+    if(m_wlist.empty()) {
+        m_io.set(ev::READ);
+    } else {
+        m_io.set(ev::READ | ev::WRITE);
+    }
 }
 
 
 void serviceinstance::read_cb(ev::io &w)
 {
+    char buff[M_MAXSIZE];
+    bzero(buff, sizeof(buff));
 
+    ssize_t rsize = recv(w.fd, buff, sizeof(buff), 0);
+    if(rsize < 0) {
+        perror("read error");
+        return ;
+    } else if(rsize == 0) {
+        delete this;
+    } else {
+        m_wlist.push_back(new mbuffer(buff, rsize));
+    }
 }
 
-void serviceinstance::write_cb(ev::io &w)
-{
 
+void serviceinstance::write_cb(ev::io &w) noexcept
+{
+    if(m_wlist.empty()) {
+        m_io.set(ev::READ);
+        return ;
+    }
+
+    mbuffer *buff = m_wlist.front();
+    ssize_t wsize = write(w.fd, buff->dpos(), buff->nbytes());
+    if(wsize < 0) {
+        perror("write error");
+        return ;
+    }
+
+    buff->curs += wsize;
+
+    if(buff->nbytes() == 0) {
+        m_wlist.pop_front();
+        delete buff;
+    }
 }
 
 
@@ -112,4 +146,12 @@ serviceinstance::~serviceinstance()
 
 } // end of core
 
+
+int main()
+{
+    core::service serv(8000);
+    serv.run();
+
+    return 0;
+}
 

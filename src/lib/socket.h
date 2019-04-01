@@ -51,8 +51,8 @@ public:
     socket(sa_family_t fm, int type, int protocol);
     void setip(const char *ip);
     void setport(int port);
-    int bind();
-    int listen();
+    void bind();
+    void listen();
     int getfd() const { return m_fd; }
     ~socket();
 };

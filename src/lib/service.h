@@ -7,6 +7,8 @@
 
 #include <ev++.h>
 #include "socket.h"
+#include <memory>
+#include <list>
 
 namespace core {
 
@@ -30,17 +32,37 @@ public:
 
 namespace privatedomain {
 
+const ssize_t M_MAXSIZE = 1024;
+
+
+struct mbuffer {
+    char *data;
+    ssize_t len;
+    ssize_t curs;
+
+    mbuffer(const char *bytes, ssize_t nbytes)
+        : curs(0), len(nbytes), data(new char[nbytes])
+    {
+        assert(data != nullptr);
+        ::memcpy(data, bytes, nbytes);
+    }
+    ~mbuffer() { delete [] data; }
+    char *dpos() const { return data + curs; }
+    ssize_t nbytes() const { return len - curs; }
+};
+
+
 class serviceinstance {
 public:
     serviceinstance(int fd);
     void read_cb(ev::io &w);
     void callback(ev::io &w, int revents);
-    void write_cb(ev::io &w);
+    void write_cb(ev::io &w) noexcept;
     ~serviceinstance();
 private:
     int m_fd;
     ev::io m_io;
-
+    std::list<privatedomain::mbuffer *> m_wlist;
 };
 
 } // end of privatedomain

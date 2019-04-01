@@ -66,14 +66,20 @@ void socket::setport(int port)
     m_addr.setport(port);
 }
 
-int socket::bind()
+void socket::bind()
 {
-    return ::bind(m_fd, (struct sockaddr *)(&m_addr.getaddr()), sizeof(struct sockaddr));
+    if(::bind(m_fd, (struct sockaddr *)(&m_addr.getaddr()), sizeof(struct sockaddr)) < 0) {
+        perror("bind");
+        return ;
+    }
 }
 
-int socket::listen()
+void socket::listen()
 {
-    return ::listen(m_fd, 1024);
+    if(::listen(m_fd, 1024) < 0) {
+        perror("listen");
+        return ;
+    }
 }
 
 socket::~socket()
