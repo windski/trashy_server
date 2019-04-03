@@ -12,24 +12,6 @@
 
 namespace core {
 
-class service
-{
-private:
-    ev::io m_listen;
-    ev::sig m_sig;
-    net::socket m_sock;
-    ev::default_loop m_loop;
-
-public:
-    explicit service(int port);
-    ~service();
-    void listen_accept(ev::io &w, int revents);
-    static void signal_cb(ev::sig &signal, int revents);
-
-    void run();
-};
-
-
 namespace privatedomain {
 
 const ssize_t M_MAXSIZE = 1024;
@@ -65,9 +47,31 @@ private:
     std::list<privatedomain::mbuffer *> m_wlist;
 };
 
+
 } // end of privatedomain
 
-}
+
+
+class service
+{
+private:
+    ev::io m_listen;
+    ev::sig m_sig;
+    net::socket m_sock;
+    ev::default_loop m_loop;
+    std::list<privatedomain::serviceinstance *> m_instance;
+
+public:
+    explicit service(int port);
+    ~service();
+    void listen_accept(ev::io &w, int revents) noexcept;
+    static void signal_cb(ev::sig &signal, int revents);
+
+    void run();
+};
+
+
+} // end of core
 
 
 

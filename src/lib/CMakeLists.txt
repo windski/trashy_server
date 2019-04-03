@@ -32,5 +32,5 @@ endif()
 
 mark_as_advanced(LIBEV_INCLUDE_DIR LIBEV_LIBRARY)
 
-set(LIB_SOURCE service.cpp service.h socket.cpp socket.h)
+set(LIB_SOURCE service.cpp service.h socket.cpp socket.h http_parse.cpp http_parse.h)
 add_executable(service ${LIB_SOURCE})

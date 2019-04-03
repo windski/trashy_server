@@ -7,7 +7,7 @@
 namespace core {
 
 service::service(int port)
-: m_sock(AF_INET, SOCK_STREAM, 0)
+: m_sock(AF_INET, SOCK_STREAM, 0), m_instance()
 {
     m_sock.setport(port);
     m_sock.bind();
@@ -33,7 +33,7 @@ void service::signal_cb(ev::sig &signal, int revents)
 }
 
 
-void service::listen_accept(ev::io &w, int revents)
+void service::listen_accept(ev::io &w, int revents) noexcept
 {
     if(EV_ERROR & revents) {
         perror("got invalid event");
@@ -44,6 +44,7 @@ void service::listen_accept(ev::io &w, int revents)
     socklen_t socklen = sizeof(struct sockaddr_in);
 
     int fd = accept(w.fd, (struct sockaddr *)(&cliaddr.getaddr()), &socklen);
+    printf("from %s  ", inet_ntoa(cliaddr.getaddr().sin_addr));
     printf("got a peer.\n");
 
     if(fd < 0) {
@@ -51,17 +52,23 @@ void service::listen_accept(ev::io &w, int revents)
         return ;
     }
 
-    // TODO: fix
     auto instance = new privatedomain::serviceinstance(fd);
+    assert(instance != nullptr);
+    m_instance.push_back(instance);
 }
 
 
 service::~service()
 {
+    for(auto& i : m_instance) {
+        assert(i != nullptr);
+        delete i;
+    }
 }
 
 
 namespace privatedomain{
+
 
 serviceinstance::serviceinstance(int fd)
 : m_fd(fd)
