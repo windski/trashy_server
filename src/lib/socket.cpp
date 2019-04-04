@@ -82,6 +82,17 @@ void socket::listen()
     }
 }
 
+
+void socket::connect() noexcept
+{
+    ssize_t socklen = sizeof(struct sockaddr);
+    if(::connect(m_fd, (struct sockaddr *)(&m_addr.getaddr()), socklen) < 0) {
+        perror("connect");
+        return ;
+    }
+}
+
+
 socket::~socket()
 {
     ::shutdown(m_fd, SHUT_RDWR);

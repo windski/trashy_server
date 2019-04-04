@@ -53,6 +53,7 @@ public:
     void setport(int port);
     void bind();
     void listen();
+    void connect() noexcept;
     int getfd() const { return m_fd; }
     ~socket();
 };
