@@ -152,13 +152,3 @@ serviceinstance::~serviceinstance()
 
 
 } // end of core
-
-
-int main()
-{
-    core::service serv(8000);
-    serv.run();
-
-    return 0;
-}
-
