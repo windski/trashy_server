@@ -7,23 +7,26 @@
 
 #include <cassert>
 #include <cstring>
+#include <memory>
 
 namespace core {
 
 namespace parse {
 
-#define CHECK_EOF()         \
-    if(buf == buf_end) {    \
-        ret = -1;           \
-        return nullptr;     \
-    }
+const size_t BUFFSIZE = 1024;
 
-#define EXPECT_CHAR(ch)     \
-    CHECK_EOF();            \
-    if(*buf++ != (ch)) {    \
-        ret = -2;           \
-        return nullptr;     \
-    }
+enum CHECK_STATUS {
+    CHKS_HEADER, CHKS_REQUEST_LINE,
+};
+
+enum LINE_STATUS {
+    LINE_OK, LINE_BAD, LINE_OPEN,
+};
+
+enum HTTP_CODE {
+    NO_REQUEST, GET_REQUEST, BAD_REQUEST,
+    CLOSED_CONNECTION, INTERNAL_ERROR
+};
 
 // no-copyable
 class http_parse
@@ -31,18 +34,20 @@ class http_parse
 public:
     http_parse();
     ~http_parse();
-    int parse_request(const char *) noexcept;
+    HTTP_CODE parse_request(const char *, CHECK_STATUS) noexcept;
 
 private:
     http_parse(const http_parse &);
     http_parse operator=(const http_parse &);
-    char *find_token(const char *buf, const char *token);
+    LINE_STATUS check_line(const char *);
+    HTTP_CODE parse_requestline(const char *, CHECK_STATUS);
+    HTTP_CODE parse_header(const char *);
 
-    const char *check_complete(const char *buf, const char *buf_end, int &ret);
     char *m_httpmethod;
     char *m_httppath;
 
-
+    int m_check_cur;
+    int m_start_line;
 };
 
 
