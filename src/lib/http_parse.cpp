@@ -3,6 +3,7 @@
 //
 
 #include "http_parse.h"
+#include <cstring>
 
 
 namespace core {
@@ -56,15 +57,48 @@ HTTP_CODE http_parse::parse_request(const char *content, CHECK_STATUS status) no
 }
 
 
-// TODO: try to implement
-LINE_STATUS http_parse::check_line(const char *)
+LINE_STATUS http_parse::check_line(const char *buff)
 {
+    char tmp;
 
+    int end_cur = strlen(buff);
+    for(; m_check_cur < end_cur; m_check_cur++) {
+        tmp = buff[m_check_cur];
+        if(tmp == '\r') {
+            // the `m_check_cur' is pointer to last character at the point.
+            if(m_check_cur + 1 == end_cur) {
+                return LINE_OPEN;
+            } else if(m_check_cur + 1 == '\n') {
+                m_check_cur += 2;
+                return LINE_OK;
+            }
+
+            return LINE_BAD;
+        } else if(tmp == '\n') {
+            if((m_check_cur > 1) && buff[m_check_cur - 1] == '\r') {
+                m_check_cur += 2;
+                return LINE_OK;
+            }
+
+            return LINE_BAD;
+        }
+    }
+
+    return LINE_OPEN;
 }
 
 
-HTTP_CODE http_parse::parse_requestline(const char *, CHECK_STATUS)
+// TODO: try to implement
+HTTP_CODE http_parse::parse_requestline(const char *buff, CHECK_STATUS status)
 {
+    assert(buff != nullptr);
+
+    std::string tbuff(buff);
+    auto idx = tbuff.find(" \t");
+    if(idx == std::string::npos) {
+        return BAD_REQUEST;
+    }
+    tbuff[idx++] = '\0';
 
 }
 
@@ -90,18 +124,18 @@ int main()
 {
     core::parse::CHECK_STATUS status = core::parse::CHKS_REQUEST_LINE;
     core::parse::http_parse ht;
-    ht.parse_request("GET /home.html HTTP/1.1\n"
-                     "Host: developer.mozilla.org\n"
-                     "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:50.0) Gecko/20100101 Firefox/50.0\n"
-                     "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\n"
-                     "Accept-Language: en-US,en;q=0.5\n"
-                     "Accept-Encoding: gzip, deflate, br\n"
-                     "Referer: https://developer.mozilla.org/testpage.html\n"
-                     "Connection: keep-alive\n"
-                     "Upgrade-Insecure-Requests: 1\n"
-                     "If-Modified-Since: Mon, 18 Jul 2016 02:36:04 GMT\n"
-                     "If-None-Match: \"c561c68d0ba92bbeb8b0fff2a9199f722e3a621a\"\n"
-                     "Cache-Control: max-age=0", status);
+    ht.parse_request("GET /home.html HTTP/1.1\r\n"
+                     "Host: developer.mozilla.org\r\n"
+                     "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:50.0) Gecko/20100101 Firefox/50.0\r\n"
+                     "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n"
+                     "Accept-Language: en-US,en;q=0.5\r\n"
+                     "Accept-Encoding: gzip, deflate, br\r\n"
+                     "Referer: https://developer.mozilla.org/testpage.html\r\n"
+                     "Connection: keep-alive\r\n"
+                     "Upgrade-Insecure-Requests: 1\r\n"
+                     "If-Modified-Since: Mon, 18 Jul 2016 02:36:04 GMT\r\n"
+                     "If-None-Match: \"c561c68d0ba92bbeb8b0fff2a9199f722e3a621a\"\r\n"
+                     "Cache-Control: max-age=0\r\n\r\n", status);
 
     return 0;
 }

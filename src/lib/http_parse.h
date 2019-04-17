@@ -13,7 +13,6 @@ namespace core {
 
 namespace parse {
 
-const size_t BUFFSIZE = 1024;
 
 enum CHECK_STATUS {
     CHKS_HEADER, CHKS_REQUEST_LINE,
@@ -28,6 +27,7 @@ enum HTTP_CODE {
     CLOSED_CONNECTION, INTERNAL_ERROR
 };
 
+
 // no-copyable
 class http_parse
 {
@@ -39,6 +39,7 @@ public:
 private:
     http_parse(const http_parse &);
     http_parse operator=(const http_parse &);
+
     LINE_STATUS check_line(const char *);
     HTTP_CODE parse_requestline(const char *, CHECK_STATUS);
     HTTP_CODE parse_header(const char *);
