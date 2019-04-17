@@ -34,5 +34,11 @@ mark_as_advanced(LIBEV_INCLUDE_DIR LIBEV_LIBRARY)
 
 set(TEST test_connection.cpp socket.h socket.cpp)
 set(LIB_SOURCE service.cpp service.h socket.cpp socket.h http_parse.cpp http_parse.h)
+
+# add abseil's build system
+add_subdirectory(abseil-cpp)
+
 add_executable(service ${LIB_SOURCE})
 add_executable(test ${TEST})
+
+target_link_libraries(service absl::strings)

@@ -9,6 +9,8 @@
 #include <cstring>
 #include <memory>
 
+#include "absl/strings/str_split.h"
+
 namespace core {
 
 namespace parse {
