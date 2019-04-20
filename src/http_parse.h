@@ -11,6 +11,12 @@
 
 #include "absl/strings/str_split.h"
 
+enum HTTP_METHODS {
+    GET, POST,
+    UNKNOWN
+};
+
+
 namespace core {
 
 namespace parse {
@@ -46,7 +52,7 @@ private:
     HTTP_CODE parse_requestline(const char *, CHECK_STATUS);
     HTTP_CODE parse_header(const char *);
 
-    char *m_httpmethod;
+    HTTP_METHODS m_httpmethod;
     char *m_httppath;
 
     int m_check_cur;

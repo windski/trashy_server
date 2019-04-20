@@ -4,14 +4,18 @@
 
 #include "http_parse.h"
 #include <cstring>
+#include <iostream>
+#include <absl/strings/str_cat.h>
+#include <absl/strings/str_join.h>
 
+#include <absl/hash/hash.h>
 
 namespace core {
 namespace parse {
 
 
 http_parse::http_parse()
-: m_httpmethod(nullptr), m_httppath(nullptr),
+: m_httpmethod(UNKNOWN), m_httppath(nullptr),
     m_check_cur(0), m_start_line(0)
 {
 }
@@ -100,10 +104,12 @@ HTTP_CODE http_parse::parse_requestline(const char *buff, CHECK_STATUS status)
     }
     tbuff[idx++] = '\0';
 
+
+
 }
 
 
-HTTP_CODE http_parse::parse_header(const char *)
+HTTP_CODE http_parse::parse_header(const char *buff)
 {
 
 }
