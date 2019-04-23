@@ -8,6 +8,8 @@
 #include <cassert>
 #include <cstring>
 #include <memory>
+#include <list>
+#include <unordered_set>
 
 #include "absl/strings/str_split.h"
 
@@ -55,6 +57,8 @@ private:
     HTTP_METHODS m_httpmethod;
     char *m_httppath;
 
+    std::unordered_set<std::string> m_key_methods;
+    std::list<absl::string_view> m_request_lines;
     int m_check_cur;
     int m_start_line;
 };
